@@ -1,0 +1,32 @@
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.main-layout {
+  /* This creates a fixed, full-screen background */
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -1; /* Keeps it behind everything */
+  
+  /* Modern Mesh Gradient (Dark Theme) */
+  background-color: #6672b8;
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(30, 58, 138, 0.5) 0, transparent 50%), 
+    radial-gradient(at 100% 100%, rgba(88, 28, 135, 0.5) 0, transparent 50%);
+  
+  /* Smooth scroll for content on top */
+  overflow-y: auto;
+}
+
+.content-container {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+}
+
