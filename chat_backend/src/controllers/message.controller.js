@@ -8,25 +8,27 @@ export const getMessages = async (req, res) => {
     const currentUserId = req.userId; // Changed from req.user.id to req.userId
     
     const query = `
-      SELECT chat_id, sender_id, receiver_id, message, sent_at, status
-      FROM chatmessage
+      SELECT message_id, sender_id, receiver_id, message, sent_at, status
+      FROM Messages
       WHERE (sender_id = $1 AND receiver_id = $2)
          OR (sender_id = $2 AND receiver_id = $1)
       ORDER BY sent_at ASC
-      LIMIT 100
+      LIMIT 100;
     `;
     
     const result = await client.query(query, [currentUserId, otherUserId]);
     
     const messages = result.rows.map(row => ({
-      id: row.chat_id,
+      message_id: row.message_id,
       message: row.message,
-      senderId: row.sender_id,
-      receiverId: row.receiver_id,
-      timestamp: row.sent_at,
+      sender_id: row.sender_id,
+      receiver_id: row.receiver_id,
+      sent_at: row.sent_at,
       status: row.status,
     }));
     
+    // 200 OK – request successful, response contains result
+
     res.status(200).json({
       messages,
       currentUserId
@@ -47,59 +49,53 @@ export const getChatList = async (req, res) => {
     const currentUserId = req.userId; // Changed from req.user.id to req.userId
     
     const query = `
-      WITH ranked_messages AS (
-        SELECT 
-          chat_id,
+    
+      SELECT
+        u.user_id AS friend_id,
+        u.name AS friend_name,
+        COALESCE(unread.unread_count, 0) AS unread_count,
+        last_msg.message AS last_message,
+        last_msg.sent_at AS last_message_timestamp
+      FROM Users u
+      LEFT JOIN (
+        SELECT
           sender_id,
-          receiver_id,
-          message,
-          sent_at,
-          status,
-          CASE 
-            WHEN sender_id = $1 THEN receiver_id 
-            ELSE sender_id 
-          END as other_user_id,
-          ROW_NUMBER() OVER (
-            PARTITION BY CASE 
-              WHEN sender_id = $1 THEN receiver_id 
-              ELSE sender_id 
-            END 
-            ORDER BY sent_at DESC
-          ) as rn
-        FROM chatmessage
-        WHERE sender_id = $1 OR receiver_id = $1
-      ),
-      unread_counts AS (
-        SELECT 
-          sender_id as other_user_id,
-          COUNT(*) as unread_count
-        FROM chatmessage
+          COUNT(*) AS unread_count
+        FROM Messages
         WHERE receiver_id = $1 AND status != 'read'
         GROUP BY sender_id
-      )
-      SELECT 
-        rm.other_user_id,
-        rm.message as last_message,
-        rm.sent_at as last_message_time,
-        COALESCE(uc.unread_count, 0) as unread_count,
-        u.name as recipient_name,
-        u.profile_picture as recipient_avatar
-      FROM ranked_messages rm
-      LEFT JOIN unread_counts uc ON rm.other_user_id = uc.other_user_id
-      LEFT JOIN users u ON rm.other_user_id = u.user_id
-      WHERE rm.rn = 1
-      ORDER BY rm.sent_at DESC
+      ) AS unread ON unread.sender_id = u.user_id
+      LEFT JOIN LATERAL (
+        SELECT
+          message,
+          sent_at
+        FROM Messages
+        WHERE (sender_id = $1 AND receiver_id = u.user_id)
+          OR (sender_id = u.user_id AND receiver_id = $1)
+        ORDER BY sent_at DESC
+        LIMIT 1
+      ) AS last_msg ON true
+      WHERE u.user_id != $1
+        AND u.user_id IN (
+          SELECT DISTINCT
+            CASE
+              WHEN sender_id = $1 THEN receiver_id
+              ELSE sender_id
+            END AS friend_id
+          FROM Messages
+          WHERE sender_id = $1 OR receiver_id = $1
+        )
+      ORDER BY last_msg.sent_at DESC;
     `;
     
     const result = await client.query(query, [currentUserId]);
     
     const chats = result.rows.map(row => ({
-      id: row.other_user_id.toString(),
-      recipientName: row.recipient_name || 'User',
-      recipientAvatar: row.recipient_avatar || null,
-      lastMessage: row.last_message,
-      lastMessageTime: row.last_message_time,
-      unreadCount: parseInt(row.unread_count)
+      friend_id: row.friend_id,
+      friend_name: row.friend_name,
+      unread_count: row.unread_count,
+      last_message: row.last_message,
+      last_message_time: row.last_message_timestamp
     }));
     
     res.status(200).json({ chats });
@@ -121,15 +117,16 @@ export const sendMessage = async (req,res) =>
         const sender_id = req.userId;
         
         const message = await pool.query(
-        `INSERT INTO ChatMessage(sender_id,receiver_id,message) VALUES($1,$2,$3) 
+        `INSERT INTO Messages(sender_id,receiver_id,message) VALUES($1,$2,$3) 
         RETURNING 
-          chat_id AS id,
-          sender_id AS senderId,
-          receiver_id AS receiverId,
+          message_id,
+          sender_id,
+          receiver_id,
           message,
           sent_at AS timestamp,
           status;`
           ,[sender_id,receiver_id,text]);
+        
         res.status(201).send(
         {
           "success" : true,

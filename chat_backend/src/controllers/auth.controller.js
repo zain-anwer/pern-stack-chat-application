@@ -7,21 +7,28 @@ export const signup = async (req,res) =>
         {
             const {name, email, password} = req.body;
 
+            // check availability
+
             if (!name || !email || !password)
                 return res.status(400).json("All fields are required\n"); 
 
-            if (password.length < 6)
+            // check password length
+
+            if (password.length < 3)
                 return res.status(400).json("Password must be six characters or greater");
 
             // Add further validations if necessary
+            // *
 
-            let result = await pool.query("SELECT * from Users where name = $1 and email = $2",[name,email]);
+            let result = await pool.query("SELECT * from Users where name = $1 and email = $2;",[name,email]);
 
             if (result.rows.length > 0)
                 return res.status(409).json("User already exists");
             
             result = await pool.query("INSERT INTO Users (name, email, password) values($1,$2,$3) RETURNING *;",[name,email,password]);
 
+            console.log(result)
+            
             // Function that generates token and sends it as a cookie through the res object
 
             const id = result.rows[0].user_id;
@@ -50,9 +57,10 @@ export const login = async (req,res) =>
        
         try
         {
-            let result = await pool.query("SELECT * from Users where email = $1 and password = $2",[email,password]);
+            let result = await pool.query("SELECT * from Users where email = $1 and password = $2;",[email,password]);
            
             // user does not exist
+
             if (result.rows.length == 0) 
                return res.status(401).json({message: "Invalid Credentials"});
 

@@ -9,4 +9,4 @@ dotenv.config();
 
 // It extracts the class Pool from the pkg object to be used later to create pool objects
 const { Pool } = pkg;
-export const pool = new Pool({connectionString : process.env.PG_URI});
+export const pool = new Pool({connectionString : process.env.DB_URI});

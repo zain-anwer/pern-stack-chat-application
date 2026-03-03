@@ -4,6 +4,9 @@ import {pool} from "../lib/db.js";
 
 dotenv.config();
 
+// the protect route function checks for token, decodes --> checks, adds user id to the req body
+
+
 export const protectRoute = async (req,res,next) =>
 {
     try
@@ -21,6 +24,7 @@ export const protectRoute = async (req,res,next) =>
         if (!token) 
             return res.status(401).json({message: "Unauthorized - No token provided"});
         const decoded = jwt.verify(token,process.env.JWT_SECRET);
+
         if (!decoded)
             return res.status(401).json({message: "Unauthorized - Invalid Token"});
 
@@ -31,9 +35,11 @@ export const protectRoute = async (req,res,next) =>
         req.userId = decoded.userId;
         next();
     }
+  
     catch(error)
     {
         console.error("Error in authorization middleware - protectRoute");
         return res.send(500).json({message:"Internal Server Error"});
     }
+
 };

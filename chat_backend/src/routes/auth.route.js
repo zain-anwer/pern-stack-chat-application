@@ -5,7 +5,7 @@ import {arcjetProtection} from '../middleware/arcjet.middleware.js';
 
 const router = express.Router();
 
-// .use function is probably used to provide the middleware function
+// .use function is used to provide the middleware function in a global manner 
 
 //router.use(arcjetProtection);
 
