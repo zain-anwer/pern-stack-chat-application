@@ -1,5 +1,5 @@
 import { useState } from "react"
-import {MessageCircleMore, UserKey} from "lucide-react"
+import {MessageCircleMore, User, Lock, Mail} from "lucide-react"
 import { axiosInstance } from "../lib/axios"
 import {Link,useNavigate} from "react-router-dom"
 import "./SignUpPage.css"
@@ -59,21 +59,30 @@ const SignUpPage = ()=>{
                     <form onSubmit={handleSubmit}>
                         
                         <label>Name
-                            <input type="text" placeholder="Kim Kardashian"
-                                value={formData.name} onChange={(e)=>{setFormData({...formData,name:e.target.value})}}
-                            />
+                            <div className="input-group">
+                                <User/>
+                                <input type="text" placeholder="Kim Kardashian"
+                                    value={formData.name} onChange={(e)=>{setFormData({...formData,name:e.target.value})}}
+                                />
+                            </div>
                         </label>
                         
                         <label>Email
-                            <input type="email" placeholder="kim.kardashian@gmail.com"
-                                value={formData.email} onChange={(e)=>{setFormData({...formData,email:e.target.value})}}
-                            />
+                            <div className="input-group">
+                                <Mail/>
+                                <input type="email" placeholder="kim.kardashian@gmail.com"
+                                    value={formData.email} onChange={(e)=>{setFormData({...formData,email:e.target.value})}}
+                                />
+                            </div>
                         </label>
                         
                         <label>Password
-                            <input type="password" 
-                                value={formData.password} onChange={(e)=>{setFormData({...formData,password:e.target.value})}}
-                            />
+                            <div className="input-group">
+                                <Lock/>
+                                <input type="password" 
+                                    value={formData.password} onChange={(e)=>{setFormData({...formData,password:e.target.value})}}
+                                />
+                            </div>
                         </label>
                     
                       <button className="submit-button">Create Account</button>

@@ -1,5 +1,5 @@
 import { useState } from "react"
-import {MessageCircleMore, UserKey} from "lucide-react"
+import {MessageCircleMore,Mail,Lock} from "lucide-react"
 import { axiosInstance } from "../lib/axios"
 import {Link,useNavigate} from "react-router-dom"
 import "./LoginPage.css"
@@ -58,17 +58,25 @@ const LoginPage = ()=>{
                     
                     <form onSubmit={handleSubmit}>
                         
+                       
                         <label>Email
-                            <input type="email" placeholder="kim.kardashian@gmail.com"
-                                value={formData.email} onChange={(e)=>{setFormData({...formData,email:e.target.value})}}
-                            />
+                            <div className="input-group">
+                                <Mail/>
+                                <input type="email" placeholder="kim.kardashian@gmail.com"
+                                    value={formData.email} onChange={(e)=>{setFormData({...formData,email:e.target.value})}}
+                                />
+                            </div>
                         </label>
                         
                         <label>Password
-                            <input type="password" 
-                                value={formData.password} onChange={(e)=>{setFormData({...formData,password:e.target.value})}}
-                            />
+                            <div className="input-group">
+                                <Lock/>
+                                <input type="password" 
+                                    value={formData.password} onChange={(e)=>{setFormData({...formData,password:e.target.value})}}
+                                />
+                            </div>
                         </label>
+                    
                     
                       <button className="submit-button">Login</button>
 

@@ -17,7 +17,7 @@ form {
 }
 
 input {
-    padding-left: 5%;
+    padding-left: 10%;
     min-width: 25vw;
     min-height: 6vh;
     border-style: solid;
@@ -27,6 +27,24 @@ input {
     background-color: transparent;
     font-family: inherit;
     font-size: medium;
+}
+
+.input-group {
+    position: relative;
+    width: 100%;
+}
+
+.input-group svg {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgb(241,241,241);
+}
+
+.input-group input {
+    padding-left: 35px; /* space for icon */
+    width: 100%;
 }
 
 input:focus {
