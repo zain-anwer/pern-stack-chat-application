@@ -10,12 +10,12 @@ export const signup = async (req,res) =>
             // check availability
 
             if (!name || !email || !password)
-                return res.status(400).json("All fields are required\n"); 
+                return res.status(400).json({message:"All fields are required"}); 
 
             // check password length
 
-            if (password.length < 3)
-                return res.status(400).json("Password must be six characters or greater");
+            if (password.length < 6)
+                return res.status(400).json({message:"Password must be six characters or greater"});
 
             // Add further validations if necessary
             // *

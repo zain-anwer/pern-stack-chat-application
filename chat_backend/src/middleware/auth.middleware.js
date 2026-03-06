@@ -6,7 +6,6 @@ dotenv.config();
 
 // the protect route function checks for token, decodes --> checks, adds user id to the req body
 
-
 export const protectRoute = async (req,res,next) =>
 {
     try

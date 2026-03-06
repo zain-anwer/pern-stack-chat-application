@@ -15,7 +15,7 @@
   z-index: -1; /* Keeps it behind everything */
   
   /* Modern Mesh Gradient (Dark Theme) */
-  background-color: #6672b8;
+  background-color: #091747;
   background-image: 
     radial-gradient(at 0% 0%, rgba(30, 58, 138, 0.5) 0, transparent 50%), 
     radial-gradient(at 100% 100%, rgba(88, 28, 135, 0.5) 0, transparent 50%);
@@ -30,3 +30,12 @@
   min-height: 100vh;
 }
 
+@keyframes spin {
+from { transform: rotate(0deg); }
+to { transform: rotate(360deg); }
+}
+
+.animate-spin {
+display: inline-block;
+animation: spin 1s linear infinite;
+}
