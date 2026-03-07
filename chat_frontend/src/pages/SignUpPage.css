@@ -16,19 +16,6 @@ form {
     gap:1.5rem;
 }
 
-input {
-    padding-left: 10%;
-    min-width: 25vw;
-    min-height: 6vh;
-    border-style: solid;
-    border-width: 2px;
-    border-radius: 5%;
-    transition: none;
-    background-color: transparent;
-    font-family: inherit;
-    font-size: medium;
-}
-
 .input-group {
     position: relative;
     width: 100%;
@@ -43,8 +30,17 @@ input {
 }
 
 .input-group input {
-    padding-left: 35px; /* space for icon */
+    padding-left: 12.5%;
     width: 100%;
+    min-width: 25vw;
+    min-height: 6vh;
+    border-style: solid;
+    border-width: 2px;
+    border-radius: 5%;
+    transition: none;
+    background-color: transparent;
+    font-family: inherit;
+    font-size: medium;
 }
 
 input:focus {
@@ -64,6 +60,9 @@ input:focus {
 
 
 .form-area{
+    display: flex;
+    gap: 0.5rem;
+    flex-direction: column;
     align-items: center;
     min-height: 80vh;
     min-width: 40vw;

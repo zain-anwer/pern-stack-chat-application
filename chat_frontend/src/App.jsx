@@ -1,4 +1,4 @@
-import {Routes, Route} from 'react-router'
+import {Routes, Route} from 'react-router-dom'
 import { axiosInstance } from './lib/axios'
 import { useEffect, useState } from 'react'
 import SignUpPage from './pages/SignUpPage'
@@ -44,14 +44,17 @@ function App() {
       <LoaderPinwheel className="animate-spin" size={40}/>
     </div>)
 
+
+  // we will be passing the authenticate setter to all page components
+
   return (
     <>
       <Toaster/>
       <div className="main-layout">
         <Routes>
-          <Route path="/" element= {userAuthenticated? <HomePage /> : <LoginPage/>} />
-          <Route path="/SignUpPage" element={<SignUpPage/>} />
-          <Route path="/LoginPage" element={<LoginPage/>} />
+          <Route path="/" element= {userAuthenticated? <HomePage setAuth={authenticate} /> : <LoginPage setAuth={authenticate}/>} />
+          <Route path="/SignUpPage" element={<SignUpPage setAuth={authenticate}/>} />
+          <Route path="/LoginPage" element={<LoginPage setAuth={authenticate}/>} />
         </Routes>
       </div>
     </>

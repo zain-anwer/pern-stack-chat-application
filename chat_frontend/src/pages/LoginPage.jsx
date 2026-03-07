@@ -1,12 +1,12 @@
 import { useState } from "react"
-import {MessageCircleMore,Mail,Lock} from "lucide-react"
+import { MessageCircleMore,Mail,Lock } from "lucide-react"
 import { axiosInstance } from "../lib/axios"
-import {Link,useNavigate} from "react-router-dom"
+import { Link,useNavigate } from "react-router-dom"
 import "./LoginPage.css"
-import {toast} from "react-hot-toast"
+import { toast } from "react-hot-toast"
 
 
-const LoginPage = ()=>{
+const LoginPage = ({setAuth})=>{
 
     // apparently you should store data in a state
     // useState function returns an array not an object
@@ -29,6 +29,7 @@ const LoginPage = ()=>{
             if (res.data.success)
             {
                 toast.success("Login Successful")
+                setAuth(true)
                 navigate("/")
             }
             else 

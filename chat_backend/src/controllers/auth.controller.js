@@ -94,5 +94,38 @@ export const logout = async (_,res) =>
         return res.status(200).json({message: "Logged out successfully"});   
     };
 
+
+export const getProfile = async (req,res) =>
+{
+    try{
+        const userId = req.userId
+
+        const result = await pool.query("SELECT name, email, password from Users where user_id = $1;",[userId])
+        
+        if (result.rows.length === 0) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        res.status(200).json({
+            name : result.rows[0].name,
+            email : result.rows[0].email,
+            password : result.rows[0].password
+        })
+    }
+    catch(error)
+    {
+        console.log(error)
+        res.status(500).json({message:"Internal Server Error"})
+    }
+}
+
 // to update any information probably profile pictures and stuff
+/*
+Notes:
+1. Include boolean fields to get the list of changed variables
+2. If password_changed then req.password to match or something equivalent I guess
+3. That's all for now
+
+*/
+
 export const updateProfile = async (req,res) => {};

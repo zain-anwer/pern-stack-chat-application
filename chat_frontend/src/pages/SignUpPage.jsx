@@ -1,12 +1,12 @@
 import { useState } from "react"
-import {MessageCircleMore, User, Lock, Mail} from "lucide-react"
+import { MessageCircleMore, User, Lock, Mail } from "lucide-react"
 import { axiosInstance } from "../lib/axios"
-import {Link,useNavigate} from "react-router-dom"
+import { Link,useNavigate } from "react-router-dom"
 import "./SignUpPage.css"
-import {toast} from "react-hot-toast"
+import { toast } from "react-hot-toast"
 
 
-const SignUpPage = ()=>{
+const SignUpPage = ({setAuth})=>{
 
     // apparently you should store data in a state
     // useState function returns an array not an object
@@ -21,7 +21,7 @@ const SignUpPage = ()=>{
         console.log("Values submitted I guess")
         await SignUp(formData)
     }
-
+ 
     const SignUp = async (formData) => {
         
         try { 
@@ -29,6 +29,7 @@ const SignUpPage = ()=>{
             if (res.data.success)
             {
                 toast.success("Sign Up Successful")
+                setAuth(true)
                 navigate("/")
             }
             else 
@@ -89,7 +90,7 @@ const SignUpPage = ()=>{
 
                     </form>
                     <br/>
-                    <Link to="/LoginPage">Already have an account? Login</Link>
+                    <Link className="login-link" to="/LoginPage">Already have an account? Login</Link>
 
                 </div>
                 <div className="picture-area">
