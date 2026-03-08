@@ -1,0 +1,46 @@
+.message-entry-area {
+    align-items: center;
+    display: flex;
+    flex-direction: row;
+    margin-top: auto;
+    justify-content: flex-end;
+    gap: 0;
+}
+
+input {
+    font-size: medium;
+    background-color: rgb(29, 25, 25);
+    border: none;
+    padding-left: 4%;
+    padding-right: 4%;
+    border-radius: 9999px 0% 0% 9999px;
+    width: 100%;
+    height: 7.5vh;
+}
+
+.send-button {
+    border-radius: 0% 9999px 9999px 0%;
+    height: 7.5vh;
+}
+
+.send-button:hover,
+.send-button:focus {
+    outline: none;
+    border: none;
+}
+
+
+.send-icon:hover {
+    transform: scale(1.05)
+}
+
+.messages-area {
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    margin-bottom: 5%;
+}
+
+.messages-area::-webkit-scrollbar-track{
+    background: transparent;
+}

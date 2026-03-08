@@ -112,25 +112,25 @@ export const sendMessage = async (req,res) =>
 {
     try
     {
-        const {message:text} = req.body;
+        const {message} = req.body;
         const {id:receiver_id} = req.params;
         const sender_id = req.userId;
         
-        const message = await pool.query(
+        const result = await pool.query(
         `INSERT INTO Messages(sender_id,receiver_id,message) VALUES($1,$2,$3) 
         RETURNING 
           message_id,
           sender_id,
           receiver_id,
           message,
-          sent_at AS timestamp,
+          sent_at,
           status;`
-          ,[sender_id,receiver_id,text]);
+          ,[sender_id,receiver_id,message]);
         
         res.status(201).send(
         {
-          "success" : true,
-          "data" : message.rows[0],
+          success : true,
+          new_message: result.rows[0]
         });
     }
 

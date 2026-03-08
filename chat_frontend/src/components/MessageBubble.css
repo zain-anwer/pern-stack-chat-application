@@ -1,0 +1,27 @@
+.timestamp{
+    align-self: flex-end;
+    font-size: 0.75rem;
+    margin-top: 10px;
+}
+
+.message-bubble-mine,
+.message-bubble-theirs {
+    display: flex;
+    flex-direction: column;
+    width: fit-content;
+    height: fit-content;
+    padding: 2%;
+    margin: 2%;
+    border-radius: 10px;
+    background-color: rgb(74, 165, 165);
+}
+
+.message-bubble-mine{
+    align-self: flex-end;
+}
+
+.status-mine{
+    margin-right: 3%;
+    font-size: 0.75rem;
+    align-self: flex-end;
+}

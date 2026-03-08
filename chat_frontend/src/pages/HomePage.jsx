@@ -38,11 +38,15 @@ const HomePage = ({setAuth})=> {
    return (
       <div className="container">
          <div className="left-area">
-           <ProfileHeader profile={profile} setAuth={setAuth}/>
-           { (activeTab === "chats") ? <ChatList/> : <ContactList/> }
+            <div className="profileInfo-area">
+               <ProfileHeader profile={profile} setAuth={setAuth}/>
+            </div>
+            <div className="chatlist-area">
+               { (activeTab === "chats") ? <ChatList setChatSelected={setChatSelected}/> : <ContactList/> }
+            </div>
          </div>
          <div className="right-area">
-            { (chatSelected === null) ? <EmptyChatContainer/> : <ChatContainer/> }
+            { (chatSelected === null) ? <EmptyChatContainer/> : <ChatContainer user_id={chatSelected}/> }
          </div>
       </div>
    )

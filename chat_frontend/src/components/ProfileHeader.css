@@ -1,0 +1,28 @@
+.name-button-area{
+    display: flex;
+    justify-content: baseline;
+    align-items: center;
+    flex-direction: row;
+    width: fit-content;
+    height: fit-content;
+}
+
+.logout-button{
+    display: flex;
+    align-items: center;
+    border: none;
+    background-color: transparent;
+    align-self:flex-end;
+}
+
+.logout-button:focus,
+.logout-button:hover,
+.logout-icon:focus,
+.logout-icon:hover{
+    outline: none;
+    border: none;
+}
+
+.logout-icon:hover{
+    stroke:rgb(180, 169, 169)
+}
