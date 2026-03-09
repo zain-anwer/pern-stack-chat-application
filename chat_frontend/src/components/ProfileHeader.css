@@ -1,20 +1,39 @@
-.name-button-area{
+.profile-info-area{
     display: flex;
-    justify-content: baseline;
+    justify-content: center;
     align-items: center;
-    flex-direction: row;
-    width: fit-content;
-    height: fit-content;
+    width: 100%;
 }
 
+.name-area{
+    display: flex;
+    justify-content: center;
+    align-items: center
+}
+
+.button-area{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    width: fit-content;
+    height: fit-content;
+    margin-left: auto;
+    margin-right: 10%;
+    gap: 0;
+}
+
+.profile-edit-button,
 .logout-button{
     display: flex;
     align-items: center;
     border: none;
     background-color: transparent;
-    align-self:flex-end;
+    padding: 5%;
 }
 
+.profile-edit-icon:focus,
+.profile-edit-icon:hover,
 .logout-button:focus,
 .logout-button:hover,
 .logout-icon:focus,
@@ -23,6 +42,7 @@
     border: none;
 }
 
+.profile-edit-icon:hover,
 .logout-icon:hover{
     stroke:rgb(180, 169, 169)
 }

@@ -1,4 +1,4 @@
-import { LogOut,CircleUserRound } from 'lucide-react'
+import { LogOut,CircleUserRound,UserPen } from 'lucide-react'
 import { axiosInstance } from '../lib/axios'
 import { toast } from 'react-hot-toast'
 import { useNavigate } from 'react-router-dom'
@@ -26,12 +26,19 @@ const ProfileHeader = (props) => {
     }
 
     return (
-        <div className="name-button-area">
-            <CircleUserRound size={35} style={{marginRight:"5%"}}/>
-            <h3>{props.profile.name}</h3>
-            <button className="logout-button" onClick={logout}>
-               <LogOut className="logout-icon" size={25}/>         
-            </button>
+        <div className="profile-info-area">
+            <div className="name-area">
+                <CircleUserRound size={35} style={{marginRight:"5%"}}/>
+                <h3>{props.profile.name}</h3>
+            </div>
+            <div className="button-area">
+                <button className="logout-button" onClick={logout}>
+                <LogOut className="logout-icon" size={25}/>         
+                </button>
+                <button onClick={()=>{toast.error("Edit-Profile component hasn't been developed yet :(")}} className="profile-edit-button">
+                    <UserPen className="profile-edit-icon" size={25}/>
+                </button>
+            </div>
         </div>
     )
 }

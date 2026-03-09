@@ -55,3 +55,18 @@
     padding: 10%;
     overflow-y: auto;
 }
+
+.active-tab-area{
+    padding-top: 5%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    gap: 0.1rem;
+}
+
+.contacts-button,
+.chats-button {
+    width: 35%;
+    background-color: rgb(75, 77, 216);
+}

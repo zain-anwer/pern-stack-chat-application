@@ -15,7 +15,7 @@ const ChatContainer = ({readRefreshes,user_information,setChatSelected,setReadRe
     useEffect(()=>
     {
         if (scrollRef.current) {
-         scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+         scrollRef.current.scrollIntoView({behavior:"smooth"})
         }
     },[messages])
 
@@ -75,7 +75,7 @@ const ChatContainer = ({readRefreshes,user_information,setChatSelected,setReadRe
                 <h3>{user_information[1]}</h3>
                 <button onClick={()=>{closeChat()}} className="close-chat-button">close chat</button>
             </div>
-            <div ref={scrollRef} className="messages-area">
+            <div className="messages-area">
                 { (messages.length != 0) ? 
                     (messages.map(
                         (message) => 
@@ -85,7 +85,10 @@ const ChatContainer = ({readRefreshes,user_information,setChatSelected,setReadRe
                     : 
                     (<p>No messages yet</p>)
                 }
+                <div ref={scrollRef}/>
             </div>
+
+           
           
             <form className="message-entry-area" onSubmit={handleSubmit}>
         
