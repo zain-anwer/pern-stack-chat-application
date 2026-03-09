@@ -1,0 +1,8 @@
+.contact-tile {
+    display: flex;
+    align-items: center;
+    text-align: left;
+    margin-top: 2%;
+    margin-bottom: 2%;
+    width: 100%
+}

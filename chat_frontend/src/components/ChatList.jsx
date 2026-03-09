@@ -3,13 +3,13 @@ import { axiosInstance } from "../lib/axios"
 import { toast } from 'react-hot-toast'
 import './ChatList.css'
 
-const ChatList = ({setChatSelected}) =>
+const ChatList = ({readRefreshes,setChatSelected}) =>
 {
     const [chatList,setChatList] = useState(null)
     
-    const selectChat = (user_id) =>
+    const selectChat = (user_id,user_name) =>
     {
-        setChatSelected(user_id)
+        setChatSelected([user_id,user_name])
         console.log("Chat selected with user id: ",user_id)
     }
     
@@ -27,7 +27,7 @@ const ChatList = ({setChatSelected}) =>
             }
         }
         getChatList()
-    },[])
+    },[readRefreshes])
 
     return (
         <div className="chats">
@@ -39,7 +39,7 @@ const ChatList = ({setChatSelected}) =>
                         // make a chat tile pleasee
                         chatList.map(
                             (chat) =>
-                                <button className="chat-tile" onClick={()=>{selectChat(chat.friend_id)}}>{chat.friend_name}<span className="chat-info">{chat.unread_count}</span></button> 
+                                <button className="chat-tile" onClick={()=>{selectChat(chat.friend_id,chat.friend_name)}}>{chat.friend_name}{(chat.unread_count !== '0') ? <span className="unread_count">{chat.unread_count}</span>: ""}</button> 
                         )
                     )
             }

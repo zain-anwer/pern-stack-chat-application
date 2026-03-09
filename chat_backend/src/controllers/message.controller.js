@@ -1,5 +1,35 @@
 import {pool} from '../lib/db.js';
 
+export const getAllContacts = async (req,res) =>
+{
+  try{
+    const currentUserId = req.userId
+    const result = await pool.query("SELECT * from Users where user_id != $1;",[currentUserId])
+    
+    const contacts = result.rows.map(row => 
+      (
+        {
+          user_id: row.user_id,
+          name: row.name
+        }
+      )
+    )
+    
+    res.status(200).json(
+      {
+        contacts,
+        currentUserId
+      }
+    )
+
+  }
+  catch(error){
+    console.log(error)
+    res.status(500).json({message:"Failed to load contacts"})
+  }
+}
+
+
 export const getMessages = async (req, res) => {
   const client = await pool.connect();
   
@@ -140,4 +170,22 @@ export const sendMessage = async (req,res) =>
         res.status(500).json({error: "Internal Server Error"});
     } 
 
+}
+
+export const readAll = async (req,res) =>
+{
+    try{
+        const sender_id = req.params.id
+        const receiver_id = req.userId
+        const result = await pool.query("UPDATE MESSAGES SET status='read' where status!='read' and sender_id=$1 and receiver_id=$2;",[sender_id,receiver_id])
+        res.status(200).json({
+            success: 'true',
+            messages_read: result.rowCount
+        })
+    }
+    catch(error)
+    {
+        console.log("Error in message controller: ",error.message);
+        res.status(500).json({error: "Internal Server Error"});
+    }
 }

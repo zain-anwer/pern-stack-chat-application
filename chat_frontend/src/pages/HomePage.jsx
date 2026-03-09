@@ -11,9 +11,10 @@ import './HomePage.css'
 
 const HomePage = ({setAuth})=> {
 
+   const [readRefreshes,setReadRefreshes] = useState(0)
    const [profile,setProfile] = useState({name:"",email:"",password:""})
-   const [activeTab,setActiveTab] = useState("chats")
-   const [chatSelected,setChatSelected] = useState(null)
+   const [activeTab,setActiveTab] = useState("contacts")
+   const [chatSelected,setChatSelected] = useState([])
 
    useEffect(() => {
       
@@ -42,14 +43,14 @@ const HomePage = ({setAuth})=> {
                <ProfileHeader profile={profile} setAuth={setAuth}/>
             </div>
             <div className="chatlist-area">
-               { (activeTab === "chats") ? <ChatList setChatSelected={setChatSelected}/> : <ContactList/> }
+               { (activeTab === "chats") ? <ChatList readRefreshes={readRefreshes} setChatSelected={setChatSelected}/> : <ContactList setChatSelected={setChatSelected}/> }
             </div>
          </div>
          <div className="right-area">
-            { (chatSelected === null) ? <EmptyChatContainer/> : <ChatContainer user_id={chatSelected}/> }
+            { (chatSelected.length == 0) ? <EmptyChatContainer/> : <ChatContainer readRefreshes={readRefreshes} setReadRefreshes={setReadRefreshes} setChatSelected={setChatSelected} user_information={chatSelected}/> }
          </div>
       </div>
-   )
+   ) 
 
 }
 

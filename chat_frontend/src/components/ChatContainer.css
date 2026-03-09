@@ -39,8 +39,30 @@ input {
     flex-direction: column;
     overflow-y: auto;
     margin-bottom: 5%;
+    flex: 1;
+    min-height: 0;
 }
 
 .messages-area::-webkit-scrollbar-track{
     background: transparent;
+}
+
+.opened-chat-info-area{
+    background-color: rgb(226, 208, 208,0.2);
+    backdrop-filter: blur(10px);
+    border-style: none;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    margin: 0;
+    padding-top: 1%;
+    padding-bottom: 1%;
+    padding-left: 2%;
+    padding-right: 2%;
+    margin-bottom: 3%;
+}
+
+.close-chat-button{
+    margin-left: auto;
+    border-radius: 999px;
 }

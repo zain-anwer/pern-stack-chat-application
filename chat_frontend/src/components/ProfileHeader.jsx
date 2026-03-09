@@ -27,10 +27,10 @@ const ProfileHeader = (props) => {
 
     return (
         <div className="name-button-area">
-            <CircleUserRound size={30} style={{marginRight:"5%"}}/>
-            <h4>{props.profile.name}</h4>
+            <CircleUserRound size={35} style={{marginRight:"5%"}}/>
+            <h3>{props.profile.name}</h3>
             <button className="logout-button" onClick={logout}>
-               <LogOut className="logout-icon" size={20}/>         
+               <LogOut className="logout-icon" size={25}/>         
             </button>
         </div>
     )

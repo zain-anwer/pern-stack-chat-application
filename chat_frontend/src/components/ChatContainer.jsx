@@ -5,7 +5,7 @@ import { axiosInstance } from '../lib/axios.js'
 import { toast } from 'react-hot-toast'
 import './ChatContainer.css'
 
-const ChatContainer = ({user_id}) =>
+const ChatContainer = ({readRefreshes,user_information,setChatSelected,setReadRefreshes}) =>
 {
     const scrollRef = useRef(null)
     const [messages,setMessages] = useState([])
@@ -21,12 +21,21 @@ const ChatContainer = ({user_id}) =>
 
     useEffect(()=>
     {
+        if (!user_information || !user_information[0]) return;
         const getMessages = async() =>
         {
             try {
-                const res = await axiosInstance.get(`/messages/${user_id}`)
+                const res = await axiosInstance.get(`/messages/${user_information[0]}`)
                 setMessages(res.data.messages)
                 setCurrentUserId(res.data.currentUserId)
+                const messages = res.data.messages
+                if (messages.length != 0 && messages[messages.length-1].sender_id != res.data.currentUserId)
+                {
+                    const res2 = await axiosInstance.put(`/read-all/${user_information[0]}`)
+                    console.log(res2.data.messages_read)
+                    setReadRefreshes(prev => prev + 1)
+                }
+
             }
             catch(error) {
                 toast.error(error.response.data.message || "Something Went Down/Wrong!")
@@ -34,7 +43,7 @@ const ChatContainer = ({user_id}) =>
         }
         getMessages()
     }
-    ,[user_id])
+    ,[user_information[0]])
 
     const handleSubmit = (e) => {
         e.preventDefault()
@@ -45,7 +54,7 @@ const ChatContainer = ({user_id}) =>
     const sendMessage = async () =>
     {
         try{
-            const res = await axiosInstance.post(`/send/${user_id}`,{message:currentMessage,userId:currentUserId})
+            const res = await axiosInstance.post(`/send/${user_information[0]}`,{message:currentMessage,userId:currentUserId})
             setCurrentMessage("")
             setMessages(prev => [...prev,res.data.new_message])
         }
@@ -54,10 +63,17 @@ const ChatContainer = ({user_id}) =>
         }
     }
 
+    const closeChat = () =>
+    {
+        setChatSelected([])
+    }
+
 
     return (
         <>
-            <div>
+            <div className="opened-chat-info-area">
+                <h3>{user_information[1]}</h3>
+                <button onClick={()=>{closeChat()}} className="close-chat-button">close chat</button>
             </div>
             <div ref={scrollRef} className="messages-area">
                 { (messages.length != 0) ? 
