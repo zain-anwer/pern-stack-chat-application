@@ -47,6 +47,8 @@ input {
     background: transparent;
 }
 
+
+
 .opened-chat-info-area{
     background-color: rgb(226, 208, 208,0.2);
     backdrop-filter: blur(10px);
@@ -60,6 +62,11 @@ input {
     padding-left: 2%;
     padding-right: 2%;
     margin-bottom: 3%;
+}
+
+.name-status-area{
+    display: flex;
+    flex-direction: column;
 }
 
 .close-chat-button{

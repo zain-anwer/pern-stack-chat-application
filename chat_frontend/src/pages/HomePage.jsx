@@ -9,7 +9,7 @@ import {toast} from 'react-hot-toast'
 import './HomePage.css' 
 
 
-const HomePage = ({setAuth})=> {
+const HomePage = ({setAuth,onlineUsers})=> {
 
    const [readRefreshes,setReadRefreshes] = useState(0)
    const [profile,setProfile] = useState({name:"",email:"",password:""})
@@ -52,7 +52,7 @@ const HomePage = ({setAuth})=> {
             </div>
          </div>
          <div className="right-area">
-            { (chatSelected.length == 0) ? <EmptyChatContainer/> : <ChatContainer readRefreshes={readRefreshes} setReadRefreshes={setReadRefreshes} setChatSelected={setChatSelected} user_information={chatSelected}/> }
+            { (chatSelected.length == 0) ? <EmptyChatContainer/> : <ChatContainer onlineUsers={onlineUsers} readRefreshes={readRefreshes} setReadRefreshes={setReadRefreshes} setChatSelected={setChatSelected} user_information={chatSelected}/> }
          </div>
       </div>
    ) 

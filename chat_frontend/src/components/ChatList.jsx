@@ -39,7 +39,7 @@ const ChatList = ({readRefreshes,setChatSelected}) =>
                         // make a chat tile pleasee
                         chatList.map(
                             (chat) =>
-                                <button className="chat-tile" onClick={()=>{selectChat(chat.friend_id,chat.friend_name)}}>{chat.friend_name}{(chat.unread_count !== '0') ? <span className="unread_count">{chat.unread_count}</span>: ""}</button> 
+                                <button key={chat.friend_id} className="chat-tile" onClick={()=>{selectChat(chat.friend_id,chat.friend_name)}}>{chat.friend_name}{(chat.unread_count !== '0') ? <span className="unread_count">{chat.unread_count}</span>: ""}</button> 
                         )
                     )
             }

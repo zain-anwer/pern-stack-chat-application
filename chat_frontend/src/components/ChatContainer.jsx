@@ -5,7 +5,7 @@ import { axiosInstance } from '../lib/axios.js'
 import { toast } from 'react-hot-toast'
 import './ChatContainer.css'
 
-const ChatContainer = ({readRefreshes,user_information,setChatSelected,setReadRefreshes}) =>
+const ChatContainer = ({user_information,setChatSelected,setReadRefreshes,onlineUsers}) =>
 {
     const scrollRef = useRef(null)
     const [messages,setMessages] = useState([])
@@ -72,14 +72,17 @@ const ChatContainer = ({readRefreshes,user_information,setChatSelected,setReadRe
     return (
         <>
             <div className="opened-chat-info-area">
-                <h3>{user_information[1]}</h3>
+                <div className="name-status-area">
+                    <h3>{user_information[1]}</h3>
+                    {(onlineUsers.includes(user_information[0])? <sub>Online</sub> : <sub>Offline</sub>)}
+                </div>
                 <button onClick={()=>{closeChat()}} className="close-chat-button">close chat</button>
             </div>
             <div className="messages-area">
                 { (messages.length != 0) ? 
                     (messages.map(
-                        (message) => 
-                            <MessageBubble message={message.message} sent_at={message.sent_at} status={message.status} mine={(message.sender_id === currentUserId)? true:false}/>
+                        (message,index) => 
+                            <MessageBubble key={index} message={message.message} sent_at={message.sent_at} status={message.status} mine={(message.sender_id === currentUserId)? true:false}/>
                         )
                     ) 
                     : 

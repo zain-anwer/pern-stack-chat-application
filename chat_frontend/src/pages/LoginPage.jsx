@@ -26,19 +26,21 @@ const LoginPage = ({setAuth})=>{
         
         try { 
             const res = await axiosInstance.post("/auth/login",formData)
-            if (res.data.success)
+            if (res?.data?.success)
             {
                 toast.success("Login Successful")
                 await setAuth(true)
                 navigate("/")
                 socketInstance.connect()
+                
             }
             else 
                 toast.error("Login Unsuccessful")
+
         }
 
         catch (error) {
-            toast.error(error.response.data.message || "Something went wrong")
+            toast.error(error?.response?.data?.message || "Something went wrong")
         }
 
     }

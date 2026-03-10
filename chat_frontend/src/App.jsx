@@ -1,10 +1,11 @@
 import {Routes, Route} from 'react-router-dom'
 import { axiosInstance } from './lib/axios'
+import { socketInstance } from './lib/socket'
 import { useEffect, useState } from 'react'
 import SignUpPage from './pages/SignUpPage'
 import LoginPage from './pages/LoginPage'
 import HomePage from './pages/HomePage'
-import {LoaderPinwheel} from 'lucide-react'
+import {ChartNoAxesColumnDecreasing, LoaderPinwheel} from 'lucide-react'
 import {Toaster} from "react-hot-toast"
 import './App.css'
 
@@ -17,6 +18,7 @@ function App() {
   // use try catch blocks when dealing with error messages because the promise is rejected or some shit
 
   const [userAuthenticated,authenticate] = useState(null)
+  const [onlineUsers,setOnlineUsers] = useState([])
 
   useEffect( () => {
     const checkAuth = async () =>
@@ -34,6 +36,25 @@ function App() {
     checkAuth()
   }
   ,[]) // the empty array shows that the effect will not rerun based on some value changing
+
+  useEffect(()=> {
+    
+      const handleOnlineUsers = (userIds) =>
+      {
+        console.log(userIds)
+        setOnlineUsers(userIds)
+      }
+
+      socketInstance.off("getOnlineUsers")
+
+      socketInstance.on("getOnlineUsers",handleOnlineUsers)
+
+      return () =>
+      {
+        socketInstance.off("getOnlineUsers")
+      };
+  }
+  ,[userAuthenticated])
     
   // placing the loading animated here so that it rerenders
   // return a loading icon preferably
@@ -52,7 +73,7 @@ function App() {
       <Toaster/>
       <div className="main-layout">
         <Routes>
-          <Route path="/" element= {userAuthenticated? <HomePage setAuth={authenticate} /> : <LoginPage setAuth={authenticate}/>} />
+          <Route path="/" element= {userAuthenticated? <HomePage setAuth={authenticate} onlineUsers={onlineUsers} /> : <LoginPage setAuth={authenticate}/>} />
           <Route path="/SignUpPage" element={<SignUpPage setAuth={authenticate}/>} />
           <Route path="/LoginPage" element={<LoginPage setAuth={authenticate}/>} />
         </Routes>

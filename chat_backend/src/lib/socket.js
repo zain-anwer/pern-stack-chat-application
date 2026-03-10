@@ -36,7 +36,7 @@ io.on("connection",(socket)=>
 
     socket.on("disconnect",()=>
     {
-        onlineUsers.delete(socket.userId)
+        onlineUsers.delete(socket.user?.user_id)
         io.emit("getOnlineUsers",[...onlineUsers])
         console.log("User Disconnected - ",socket.user?.name)
     })
