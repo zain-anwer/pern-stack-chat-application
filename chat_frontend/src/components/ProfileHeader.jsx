@@ -1,5 +1,6 @@
 import { LogOut,CircleUserRound,UserPen } from 'lucide-react'
 import { axiosInstance } from '../lib/axios'
+import { socketInstance } from '../lib/socket'
 import { toast } from 'react-hot-toast'
 import { useNavigate } from 'react-router-dom'
 import './ProfileHeader.css'
@@ -13,9 +14,12 @@ const ProfileHeader = (props) => {
         try{ 
             const res = await axiosInstance.post("/auth/logout")
             if (res.status == 200)
+            {
                 toast.success("Logged out successfully")
-            props.setAuth(false)
-            navigate('/')           
+                socketInstance.disconnect()
+                props.setAuth(false)
+                navigate('/')       
+            }    
         }
 
         catch(error)

@@ -1,10 +1,10 @@
 import { useState } from "react"
 import { MessageCircleMore,Mail,Lock } from "lucide-react"
 import { axiosInstance } from "../lib/axios"
+import { socketInstance } from "../lib/socket"
 import { Link,useNavigate } from "react-router-dom"
-import "./LoginPage.css"
 import { toast } from "react-hot-toast"
-
+import "./LoginPage.css"
 
 const LoginPage = ({setAuth})=>{
 
@@ -29,8 +29,9 @@ const LoginPage = ({setAuth})=>{
             if (res.data.success)
             {
                 toast.success("Login Successful")
-                setAuth(true)
+                await setAuth(true)
                 navigate("/")
+                socketInstance.connect()
             }
             else 
                 toast.error("Login Unsuccessful")
