@@ -21,25 +21,30 @@ io.use(socketAuthMiddleware)
 
 // takes the name of the event and the callback function
 
-const onlineUsers = new Set()
+
+// mapping user_id to socket_id
+const userSocketMap = {}
 
 io.on("connection",(socket)=>
 {
     console.log("User Connected - ",socket.user?.name)
-    onlineUsers.add(socket.userId)
+    userSocketMap[socket.userId] = socket.id
 
     // io.emit is used to broadcast to all available clients
 
-    io.emit("getOnlineUsers",[...onlineUsers])
+    io.emit("getOnlineUsers",Object.keys(userSocketMap))
 
     // socket.on is used to listen to events
 
     socket.on("disconnect",()=>
     {
-        onlineUsers.delete(socket.user?.user_id)
-        io.emit("getOnlineUsers",[...onlineUsers])
+        delete userSocketMap[socket.userId]
+        io.emit("getOnlineUsers",Object.keys(userSocketMap))
         console.log("User Disconnected - ",socket.user?.name)
     })
 })
 
-export {io, app, server}
+const getReceiverSocket = (user_id) =>
+{   return userSocketMap[user_id]   }
+
+export {io, app, server, getReceiverSocket}

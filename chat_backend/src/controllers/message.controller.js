@@ -1,4 +1,5 @@
 import {pool} from '../lib/db.js';
+import {io, getReceiverSocket} from '../lib/socket.js';
 
 export const getAllContacts = async (req,res) =>
 {
@@ -157,6 +158,13 @@ export const sendMessage = async (req,res) =>
           status;`
           ,[sender_id,receiver_id,message]);
         
+        const receiverSocket = getReceiverSocket(receiver_id)
+
+        if (receiverSocket)
+          io.to(receiverSocket).emit("getMessage",result.rows[0])
+        else
+          console.log("User Offline/Error in socket creation")
+
         res.status(201).send(
         {
           success : true,

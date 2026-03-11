@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import MessageBubble from './MessageBubble.jsx'
 import { SendHorizonal } from 'lucide-react'
 import { axiosInstance } from '../lib/axios.js'
+import { socketInstance } from '../lib/socket.js'
 import { toast } from 'react-hot-toast'
 import './ChatContainer.css'
 
@@ -22,6 +23,12 @@ const ChatContainer = ({user_information,setChatSelected,setReadRefreshes,online
     useEffect(()=>
     {
         if (!user_information || !user_information[0]) return;
+
+        const handler = (new_message) =>
+        {
+            setMessages(prev => [...prev,new_message])
+        }
+
         const getMessages = async() =>
         {
             try {
@@ -36,12 +43,17 @@ const ChatContainer = ({user_information,setChatSelected,setReadRefreshes,online
                     setReadRefreshes(prev => prev + 1)
                 }
 
+                socketInstance.on("getMessage",handler)
+
             }
             catch(error) {
                 toast.error(error.response.data.message || "Something Went Down/Wrong!")
             }
         }
         getMessages()
+        return () => {
+            socketInstance.off("getMessage",handler)
+        }
     }
     ,[user_information[0]])
 
