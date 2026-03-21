@@ -12,6 +12,7 @@ router.use(protectRoute);
 router.get("/get-all-contacts",getAllContacts)
 router.get("/chats",getChatList);
 router.get("/messages/:otherUserId",getMessages);
+router.post("/create-group",createGroup);
 router.post("/send/:id",sendMessage);
 router.put("/read-all/:id",readAll);
 

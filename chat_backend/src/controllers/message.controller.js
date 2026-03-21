@@ -40,7 +40,7 @@ export const getMessages = async (req, res) => {
     
     const query = `
       SELECT message_id, sender_id, receiver_id, message, sent_at, status
-      FROM Messages
+      FROM Messages 
       WHERE (sender_id = $1 AND receiver_id = $2)
          OR (sender_id = $2 AND receiver_id = $1)
       ORDER BY sent_at ASC
