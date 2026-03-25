@@ -6,7 +6,9 @@ import { socketInstance } from '../lib/socket.js'
 import { toast } from 'react-hot-toast'
 import './ChatContainer.css'
 
-const ChatContainer = ({user_information,setChatSelected,setReadRefreshes,onlineUsers}) =>
+/* chat_information = [conversation_id,display_name,is_group,other_user_id] */
+
+const ChatContainer = ({chat_information,setChatSelected,setReadRefreshes,onlineUsers}) =>
 {
     const scrollRef = useRef(null)
     const [messages,setMessages] = useState([])
@@ -22,7 +24,7 @@ const ChatContainer = ({user_information,setChatSelected,setReadRefreshes,online
 
     useEffect(()=>
     {
-        if (!user_information || !user_information[0]) return;
+        if (!chat_information) return;
 
         const handler = (new_message) =>
         {
@@ -32,19 +34,28 @@ const ChatContainer = ({user_information,setChatSelected,setReadRefreshes,online
         const getMessages = async() =>
         {
             try {
-                const res = await axiosInstance.get(`/messages/${user_information[0]}`)
+                let res;
+                console.log("This is the get messages function with convo id: ",chat_information[0])
+                
+                if (chat_information[0])
+                    res = await axiosInstance.get(`/messages/${chat_information[0]}`)
+                else
+                {
+                    const find_convo_result = await axiosInstance.get(`/convo-id/${chat_information[3]}`)
+                    if (!find_convo_result.data.success)
+                    {
+                        setMessages(null)
+                        return
+                    }
+                    res = await axiosInstance.get(`/messages/${find_convo_result.data.conversation_id}`)
+                }
+                console.log(res)
+                
                 setMessages(res.data.messages)
                 setCurrentUserId(res.data.currentUserId)
-                const messages = res.data.messages
-                if (messages.length != 0 && messages[messages.length-1].sender_id != res.data.currentUserId)
-                {
-                    const res2 = await axiosInstance.put(`/read-all/${user_information[0]}`)
-                    console.log(res2.data.messages_read)
-                    setReadRefreshes(prev => prev + 1)
-                }
+                setReadRefreshes(prev => prev + 1)
 
                 socketInstance.on("getMessage",handler)
-
             }
             catch(error) {
                 toast.error(error.response.data.message || "Something Went Down/Wrong!")
@@ -55,7 +66,7 @@ const ChatContainer = ({user_information,setChatSelected,setReadRefreshes,online
             socketInstance.off("getMessage",handler)
         }
     }
-    ,[user_information[0]])
+    ,[chat_information[0]])
 
     const handleSubmit = (e) => {
         e.preventDefault()
@@ -66,7 +77,11 @@ const ChatContainer = ({user_information,setChatSelected,setReadRefreshes,online
     const sendMessage = async () =>
     {
         try{
-            const res = await axiosInstance.post(`/send/${user_information[0]}`,{message:currentMessage,userId:currentUserId})
+            let res;
+            if (chat_information[2])
+                res = await axiosInstance.post(`/send/group-chat/${chat_information[0]}`,{message:currentMessage,userId:currentUserId})
+            else
+                res = await axiosInstance.post(`/send/chat/${chat_information[3]}`,{message:currentMessage,userId:currentUserId})
             setCurrentMessage("")
             setMessages(prev => [...prev,res.data.new_message])
         }
@@ -85,8 +100,8 @@ const ChatContainer = ({user_information,setChatSelected,setReadRefreshes,online
         <>
             <div className="opened-chat-info-area">
                 <div className="name-status-area">
-                    <h3>{user_information[1]}</h3>
-                    {(onlineUsers.includes(user_information[0])? <sub>Online</sub> : <sub>Offline</sub>)}
+                    <h3>{chat_information[1]}</h3>
+                    {(onlineUsers.includes(chat_information[0])? <sub style={{fontFamily: 'Roboto'}}>Online</sub> : <sub style={{fontFamily: 'Roboto'}}>Offline</sub>)}
                 </div>
                 <button onClick={()=>{closeChat()}} className="close-chat-button">close chat</button>
             </div>
@@ -94,7 +109,7 @@ const ChatContainer = ({user_information,setChatSelected,setReadRefreshes,online
                 { (messages.length != 0) ? 
                     (messages.map(
                         (message,index) => 
-                            <MessageBubble key={index} message={message.message} sent_at={message.sent_at} status={message.status} mine={(message.sender_id === currentUserId)? true:false}/>
+                            <MessageBubble key={index} message={message.message} sent_at={message.sent_at} status={message.status} mine={(message.sender_id == currentUserId)? true:false}/>
                         )
                     ) 
                     : 
@@ -103,7 +118,6 @@ const ChatContainer = ({user_information,setChatSelected,setReadRefreshes,online
                 <div ref={scrollRef}/>
             </div>
 
-           
           
             <form className="message-entry-area" onSubmit={handleSubmit}>
         

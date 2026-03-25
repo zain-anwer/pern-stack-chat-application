@@ -7,12 +7,11 @@ const ContactList = ({setChatSelected})=>
 {
     const [contacts,setContacts] = useState([])
 
-    const selectChat = (user_id,user_name) =>
+    const selectChat = (receiver_id,display_name) =>
     {
-        setChatSelected([user_id,user_name])
-        console.log("Chat selected with user id: ",user_id)
-    }
-    
+        setChatSelected([null,display_name,false,receiver_id])
+        console.log("Chat selected with user id: ",receiver_id)
+    }    
 
     useEffect(()=>
     {
@@ -34,7 +33,7 @@ const ContactList = ({setChatSelected})=>
         <>
             {
                 contacts.map(contact => 
-                    <button onClick={()=>{selectChat(contact.user_id,contact.name)}} className="contact-tile">{contact.name}</button>
+                    <button key={contact.user_id} onClick={()=>{selectChat(contact.user_id,contact.name)}} className="contact-tile">{contact.name}</button>
                 )
             }
         </>

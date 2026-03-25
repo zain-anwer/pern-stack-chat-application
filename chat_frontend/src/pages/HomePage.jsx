@@ -52,7 +52,7 @@ const HomePage = ({setAuth,onlineUsers})=> {
             </div>
          </div>
          <div className="right-area">
-            { (chatSelected.length == 0) ? <EmptyChatContainer/> : <ChatContainer onlineUsers={onlineUsers} readRefreshes={readRefreshes} setReadRefreshes={setReadRefreshes} setChatSelected={setChatSelected} user_information={chatSelected}/> }
+            { (chatSelected.length == 0) ? <EmptyChatContainer/> : <ChatContainer onlineUsers={onlineUsers} readRefreshes={readRefreshes} setReadRefreshes={setReadRefreshes} setChatSelected={setChatSelected} chat_information={chatSelected}/> }
          </div>
       </div>
    ) 

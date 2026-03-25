@@ -7,10 +7,10 @@ const ChatList = ({readRefreshes,setChatSelected}) =>
 {
     const [chatList,setChatList] = useState(null)
     
-    const selectChat = (user_id,user_name) =>
+    const selectChat = (conversation_id,display_name,is_group,other_user_id) =>
     {
-        setChatSelected([user_id,user_name])
-        console.log("Chat selected with user id: ",user_id)
+        setChatSelected([conversation_id,display_name,is_group,other_user_id])
+        console.log("Chat selected with display id: ",display_id)
     }
     
     
@@ -39,7 +39,7 @@ const ChatList = ({readRefreshes,setChatSelected}) =>
                         // make a chat tile pleasee
                         chatList.map(
                             (chat) =>
-                                <button key={chat.friend_id} className="chat-tile" onClick={()=>{selectChat(chat.friend_id,chat.friend_name)}}>{chat.friend_name}{(chat.unread_count !== '0') ? <span className="unread_count">{chat.unread_count}</span>: ""}</button> 
+                                <button key={chat.conversation_id} className="chat-tile" onClick={()=>{selectChat(chat.conversation_id,chat.display_name,chat.is_group,chat.other_user_id)}}>{chat.display_name}{(chat.unread_count !== '0') ? <span className="unread_count">{chat.unread_count}</span>: ""}</button> 
                         )
                     )
             }

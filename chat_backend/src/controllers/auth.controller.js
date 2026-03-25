@@ -32,7 +32,7 @@ export const signup = async (req,res) =>
             
             // encrypting password
 
-            const encrypted_password = bcrypt.hash(password,process.env.SALT_ROUNDS);
+            const encrypted_password = await bcrypt.hash(password,parseInt(process.env.SALT_ROUNDS));
 
             result = await pool.query("INSERT INTO Users (name, email, password) values($1,$2,$3) RETURNING *;",[name,email,encrypted_password]);
 
@@ -66,7 +66,7 @@ export const login = async (req,res) =>
        
         try
         {
-            let result = await pool.query("SELECT password from Users where email = $1;",[email]);
+            let result = await pool.query("SELECT * from Users where email = $1;",[email]);
            
             // user does not exist
 
@@ -78,12 +78,12 @@ export const login = async (req,res) =>
 
             // check whether password is correct or not
 
-            const isMatch = bcrypt.compare(password,result.rows[0].password);
+            const isMatch = await bcrypt.compare(password,result.rows[0].password);
 
             if (!isMatch)
             {
                 console.log("Incorrect password entered throwing HTTP ERROR 401 - UNAUTHORIZED");
-                res.status(401).json({message:"Incorrect Password"});
+                return res.status(401).json({message:"Incorrect Password"});
             }
 
             const id = result.rows[0].user_id.toString();

@@ -21,7 +21,7 @@ const messages_query = `
 
         -- a little auth check (requesting person should be part of the convo and not a nosy lil...)
 
-        AND EXISTS (SELECT * from Conversation_Members WHERE member_id = $1 AND conversation_id = $2)
+        AND EXISTS (SELECT * from Conversation_Members cm WHERE cm.member_id = $1 AND cm.conversation_id = $2)
   
       ORDER BY Messages.sent_at ASC
       LIMIT 100;
@@ -31,7 +31,7 @@ const chatlist_query = `
   
       SELECT 
         
-        Conversations.conversation_id as display_id,
+        Conversations.conversation_id as conversation_id,
         Messages.message as last_message, 
         Messages.sent_at as last_message_time,
         is_group,
@@ -46,7 +46,7 @@ const chatlist_query = `
         
         CASE WHEN is_group = FALSE 
           THEN Conversation_Members.member_id 
-          ELSE NULL END as receiver_id, 
+          ELSE NULL END as other_user_id, 
 
         -- unread count 
         (SELECT COUNT(*) 
@@ -79,7 +79,6 @@ const chatlist_query = `
       ORDER BY
         Messages.sent_at DESC;
 `;
-
 
 // check whether conversation exists
 
@@ -120,8 +119,15 @@ const readall_query = ` UPDATE Message_Status
                                         WHERE
                                           Messages.sender_id != $1
                                           AND Conversation_Members.member_id = $1
-                                          AND conversation_id = $2);
+                                          AND Conversation_Members.conversation_id = $2);
                       `
+
+const get_convo_id = ` SELECT cm1.conversation_id FROM
+                      Conversation_Members cm1 JOIN Conversation_Members cm2
+                      ON cm1.conversation_id = cm2.conversation_id 
+                      WHERE cm1.member_id = $1 AND cm2.member_id = $2;
+                      
+`
 
 /* ------------------------------------------------------------------------------------------------- */
 
@@ -157,17 +163,22 @@ export const getAllContacts = async (req,res) =>
 };
 
 export const getMessages = async (req, res) => {
+  
   const client = await pool.connect();
+  
+  console.log("In the message controller\n")
   
   try {
     const { conversation_id } = req.params;
-    const { other_user_id } = req.params;
     const currentUserId = req.userId; // Changed from req.user.id to req.userId
     let result;
 
     if (conversation_id)
+    {
       result = await client.query(messages_query, [currentUserId, conversation_id]);
-    
+      await client.query(readall_query,[currentUserId,conversation_id]);
+    }
+
     else
     {
       return res.status(200).json({
@@ -209,10 +220,10 @@ export const getChatList = async (req, res) => {
     const result = await client.query(chatlist_query, [currentUserId]);
     
     const chats = result.rows.map(row => ({
-      display_id: row.display_id,
+      conversation_id: row.conversation_id,
       display_name: row.display_name,
       is_group: row.is_group,
-      receiver_id: row.receiver_id,
+      other_user_id: row.other_user_id,
       unread_count: row.unread_count,
       last_message: row.last_message,
       last_message_time: row.last_message_time
@@ -230,6 +241,7 @@ export const getChatList = async (req, res) => {
 
 export const sendMessage = async (req,res) => 
 {
+    console.log("In the send message controller\n");
     const client = await pool.connect();
     // send NULL if conversation doesn't exist
     try
@@ -319,6 +331,38 @@ export const sendMessage = async (req,res) =>
 
 };
 
+export const getConvoId = async (req,res) => {
+  try
+  {
+    const {other_user_id} = req.params;
+    const current_user_id = req.userId;
+
+    if (other_user_id == current_user_id)
+      return res.status(400).json({message: "Bad Request --- Identical Ids"});
+
+    const result = await pool.query(get_convo_id,[other_user_id,current_user_id]);
+    if (result.rows.length == 0)
+    {
+      return res.status(404).json({
+        success: false,
+        conversation_id: null
+      })
+    }
+    else
+    {
+      return res.status(200).json({
+        success: true,
+        conversation_id: result.rows[0].conversation_id 
+      })
+    } 
+  }
+  catch(error){
+    console.error('Error finding conversation id: ', error);
+    res.status(500).json({ message: 'Failed to find conversation id' });
+  }
+}
+
+/*
 export const readAll = async (req,res) =>
 {
     try
@@ -340,3 +384,4 @@ export const readAll = async (req,res) =>
         res.status(500).json({error: "Internal Server Error"});
     }
 };
+*/
