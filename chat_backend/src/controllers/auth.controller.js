@@ -1,5 +1,10 @@
 import { pool } from '../lib/db.js';
 import { generateToken } from '../lib/utils.js';
+import dotenv from 'dotenv';
+import bcrypt from 'bcrypt';
+
+// using the env file to get salt rounds for bcrypt
+dotenv.config();
 
 export const signup = async (req,res) => 
     { 
@@ -25,7 +30,11 @@ export const signup = async (req,res) =>
             if (result.rows.length > 0)
                 return res.status(409).json("User already exists");
             
-            result = await pool.query("INSERT INTO Users (name, email, password) values($1,$2,$3) RETURNING *;",[name,email,password]);
+            // encrypting password
+
+            const encrypted_password = bcrypt.hash(password,process.env.SALT_ROUNDS);
+
+            result = await pool.query("INSERT INTO Users (name, email, password) values($1,$2,$3) RETURNING *;",[name,email,encrypted_password]);
 
             console.log(result)
             
@@ -57,7 +66,7 @@ export const login = async (req,res) =>
        
         try
         {
-            let result = await pool.query("SELECT * from Users where email = $1 and password = $2;",[email,password]);
+            let result = await pool.query("SELECT password from Users where email = $1;",[email]);
            
             // user does not exist
 
@@ -65,6 +74,17 @@ export const login = async (req,res) =>
                return res.status(401).json({message: "Invalid Credentials"});
 
             // user exists
+
+
+            // check whether password is correct or not
+
+            const isMatch = bcrypt.compare(password,result.rows[0].password);
+
+            if (!isMatch)
+            {
+                console.log("Incorrect password entered throwing HTTP ERROR 401 - UNAUTHORIZED");
+                res.status(401).json({message:"Incorrect Password"});
+            }
 
             const id = result.rows[0].user_id.toString();
             const fullname = result.rows[0].name;

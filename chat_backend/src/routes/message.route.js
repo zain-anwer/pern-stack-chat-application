@@ -11,8 +11,15 @@ router.use(protectRoute);
 
 router.get("/get-all-contacts",getAllContacts)
 router.get("/chats",getChatList);
-router.get("/messages/:otherUserId",getMessages);
-router.post("/send/:id",sendMessage);
-router.put("/read-all/:id",readAll);
+
+// 1-1 chats
+router.get("/messages/chat/:other_user_id",getMessages);
+router.post("/send/chat/:receiver_id",sendMessage);
+
+// group chats
+router.get("/messages/group-chat/:conversation_id",getMessages);
+router.post("/send/group-chat/:conversation_id",sendMessage);
+
+router.put("/read-all/:conversation_id",readAll);
 
 export default router;

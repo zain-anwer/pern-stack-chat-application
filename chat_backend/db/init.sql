@@ -20,11 +20,11 @@ CREATE TABLE Users (
 CREATE TABLE Conversations (
     conversation_id BIGSERIAL PRIMARY KEY,
     is_group BOOLEAN NOT NULL DEFAULT FALSE,
-    name TEXT,
+    name TEXT DEFAULT NULL,
     CHECK ((is_group = false AND name IS NULL)
-    OR (is_group = true AND name IS NOT NULL),
-    last_message_id BIGINT
-));
+    OR (is_group = true AND name IS NOT NULL)),
+    last_message_id BIGINT DEFAULT NULL
+);
 
 CREATE TABLE Messages (
     message_id BIGSERIAL PRIMARY KEY,
@@ -55,6 +55,14 @@ CREATE TABLE Conversation_Members (
    PRIMARY KEY (conversation_id, member_id)
 );
 
+
+
+
+
+
+/* ---------------------------------------- TRIGGERS ------------------------------------------------*/
+
+
 -- trigger to get the updated timestamp
 
 CREATE OR REPLACE FUNCTION update_timestamp()
@@ -84,6 +92,39 @@ $$ LANGUAGE plpgsql;
 CREATE TRIGGER trg_last_message_id_updated
 AFTER INSERT ON Messages
 FOR EACH ROW EXECUTE FUNCTION update_last_message_id();
+
+-- trigger to handler message status entries for every convo participant for each new message
+
+CREATE OR REPLACE FUNCTION create_message_status_entries()
+RETURNS TRIGGER AS $$
+BEGIN
+
+    -- handling message status entries
+
+    INSERT INTO Message_Status (message_id, receiver_id)
+    SELECT NEW.message_id, cm.member_id
+    FROM Conversation_Members cm
+    WHERE cm.conversation_id = NEW.conversation_id
+      AND cm.member_id != NEW.sender_id;
+
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_auto_message_status
+AFTER INSERT ON Messages
+FOR EACH ROW EXECUTE FUNCTION create_message_status_entries();
+
+
+/*---------------------------------------------------------------------------------------------------*/
+
+
+
+
+
+
+/*-------------------------------------------- INDEXES ----------------------------------------------*/
 
 -- we will be creating indexes based on search queries
 
