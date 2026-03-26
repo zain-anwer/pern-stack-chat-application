@@ -31,8 +31,7 @@ const LoginPage = ({setAuth})=>{
                 toast.success("Login Successful")
                 await setAuth(true)
                 navigate("/")
-                socketInstance.connect()
-                
+                if (!socketInstance.connected) socketInstance.connect();
             }
             else 
                 toast.error("Login Unsuccessful")

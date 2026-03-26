@@ -27,6 +27,9 @@ function App() {
          const res = await axiosInstance.get("/auth/check")
         if (res.data.userId)
           authenticate(true)
+        
+        // to reconnect socket on re-renders
+        if (!socketInstance.connected) socketInstance.connect();
       }
      
       catch{ 
@@ -54,7 +57,7 @@ function App() {
         socketInstance.off("getOnlineUsers")
       };
   }
-  ,[userAuthenticated])
+  ,[])
     
   // placing the loading animated here so that it rerenders
   // return a loading icon preferably

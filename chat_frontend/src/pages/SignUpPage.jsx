@@ -30,7 +30,7 @@ const SignUpPage = ({setAuth})=>{
             if (res.data.success)
             {
                 toast.success("Sign Up Successful")
-                socketInstance.connect()
+                if (!socketInstance.connected) socketInstance.connect();
                 setAuth(true)
                 navigate("/")
             }
