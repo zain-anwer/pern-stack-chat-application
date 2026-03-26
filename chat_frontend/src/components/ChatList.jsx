@@ -1,18 +1,39 @@
 import { useEffect, useState } from 'react'
 import { axiosInstance } from "../lib/axios"
 import { toast } from 'react-hot-toast'
+import { socketInstance } from '../lib/socket'
 import './ChatList.css'
 
-const ChatList = ({readRefreshes,setChatSelected}) =>
+const ChatList = ({setReadRefreshes,readRefreshes,setChatSelected}) =>
 {
     const [chatList,setChatList] = useState(null)
+    
+    // we will be using a use-effect to register a socket event on mount
+    
+    useEffect(()=>
+    { 
+        const handler = () =>
+        {
+            console.log("Inside the get message event handler -- updating unread count")
+            // to trigger reloading to show newly arrived messages
+            setReadRefreshes(prev => prev + 1)
+        }
+
+        socketInstance.on("getMessage",handler)
+
+        return () =>
+        {
+            socketInstance.off("getMessage",handler)
+        }
+
+    },[])
+    
     
     const selectChat = (conversation_id,display_name,is_group,other_user_id) =>
     {
         setChatSelected([conversation_id,display_name,is_group,other_user_id])
         console.log("Chat selected with conversation id: ",conversation_id)
     }
-    
     
     useEffect(()=>{
         const getChatList = async () => {

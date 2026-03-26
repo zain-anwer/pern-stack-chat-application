@@ -369,6 +369,24 @@ export const getConvoId = async (req,res) => {
   }
 }
 
+export const readMessage = async (req,res) => {
+  try{
+    const { message_id } = req.params
+    const receiver_id = req.userId
+
+    const result = await pool.query("UPDATE Message_Status SET status = 'read' WHERE message_id = $1 AND receiver_id = $2 RETURNING *;",[message_id,receiver_id]);
+    return res.status(200).json({
+      success: true,
+      result
+    })
+  } 
+  catch(error)
+  {
+    console.log('Error reading message: ', error)
+    return res.status(500).json({message: 'Error update message status to read'});
+  }
+}
+
 /*
 export const readAll = async (req,res) =>
 {

@@ -16,7 +16,8 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors({
-  origin: true,
+  origin: 'http://localhost:5173',
+  methods: ['GET','PUT','DELETE','POST'],
   credentials: true
 }));
 
@@ -32,3 +33,15 @@ server.listen(PORT,()=>{
   console.log(process.env.DB_URI)
   console.log(`Listening at http://localhost:${PORT}`)
 })
+
+/* debugging middlewares */
+
+app.use((req, res) => {
+  console.log("404 - No route matched:", req.method, req.url);
+  res.status(404).json({ message: "Route not found" });
+});
+
+app.use((req, res, next) => {
+  console.log(`Incoming: ${req.method} ${req.url}`);
+  next();
+});

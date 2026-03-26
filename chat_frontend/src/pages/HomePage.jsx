@@ -48,7 +48,7 @@ const HomePage = ({setAuth,onlineUsers})=> {
                <button onClick={()=>{setActiveTab("contacts")}} className="contacts-button">Contacts</button>
             </div>
             <div className="chatlist-area">
-               { (activeTab === "chats") ? <ChatList readRefreshes={readRefreshes} setChatSelected={setChatSelected}/> : <ContactList setChatSelected={setChatSelected}/> }
+               { (activeTab === "chats") ? <ChatList setReadRefreshes={setReadRefreshes} readRefreshes={readRefreshes} setChatSelected={setChatSelected}/> : <ContactList setChatSelected={setChatSelected}/> }
             </div>
          </div>
          <div className="right-area">

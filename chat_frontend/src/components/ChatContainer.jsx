@@ -26,9 +26,18 @@ const ChatContainer = ({chat_information,setChatSelected,setReadRefreshes,online
     {
         if (!chat_information) return;
 
-        const handler = (new_message) =>
+        const handler = async (new_message) =>
         {
             setMessages(prev => [...prev,new_message])
+            
+            try {
+                console.log("Message Id: ",new_message.message_id)
+                await axiosInstance.put(`/read-message/${parseInt(new_message.message_id)}`);
+            } 
+            catch (err) {
+                console.error("Error updating read status:", err.response?.status, err.response?.data);
+            }
+            setReadRefreshes(prev => prev + 1)
         }
 
         /* this is supposed to be an async listener I guess */
@@ -111,8 +120,8 @@ const ChatContainer = ({chat_information,setChatSelected,setReadRefreshes,online
             <div className="messages-area">
                 { (messages.length != 0) ? 
                     (messages.map(
-                        (message,index) => 
-                            <MessageBubble key={index} message={message.message} sent_at={message.sent_at} status={message.status} mine={(message.sender_id == currentUserId)? true:false}/>
+                        (message) => 
+                            <MessageBubble key={message.message_id} message={message.message} sent_at={message.sent_at} status={message.status} mine={(message.sender_id == currentUserId)? true:false}/>
                         )
                     ) 
                     : 
