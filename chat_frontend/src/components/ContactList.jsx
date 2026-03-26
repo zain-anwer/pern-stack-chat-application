@@ -7,10 +7,10 @@ const ContactList = ({setChatSelected})=>
 {
     const [contacts,setContacts] = useState([])
 
-    const selectChat = (receiver_id,display_name) =>
+    const selectChat = (other_user_id,display_name) =>
     {
-        setChatSelected([null,display_name,false,receiver_id])
-        console.log("Chat selected with user id: ",receiver_id)
+        setChatSelected([null,display_name,false,other_user_id])
+        console.log("Chat selected with user id: ",other_user_id)
     }    
 
     useEffect(()=>

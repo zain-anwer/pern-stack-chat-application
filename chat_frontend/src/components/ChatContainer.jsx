@@ -31,9 +31,13 @@ const ChatContainer = ({chat_information,setChatSelected,setReadRefreshes,online
             setMessages(prev => [...prev,new_message])
         }
 
+        /* this is supposed to be an async listener I guess */
+        socketInstance.on("getMessage",handler)
+
         const getMessages = async() =>
         {
             try {
+
                 let res;
                 console.log("This is the get messages function with convo id: ",chat_information[0])
                 
@@ -54,19 +58,18 @@ const ChatContainer = ({chat_information,setChatSelected,setReadRefreshes,online
                 setMessages(res.data.messages)
                 setCurrentUserId(res.data.currentUserId)
                 setReadRefreshes(prev => prev + 1)
-
-                socketInstance.on("getMessage",handler)
             }
             catch(error) {
                 toast.error(error.response.data.message || "Something Went Down/Wrong!")
             }
         }
         getMessages()
+
         return () => {
             socketInstance.off("getMessage",handler)
         }
     }
-    ,[chat_information[0]])
+    ,[chat_information])
 
     const handleSubmit = (e) => {
         e.preventDefault()
@@ -101,7 +104,7 @@ const ChatContainer = ({chat_information,setChatSelected,setReadRefreshes,online
             <div className="opened-chat-info-area">
                 <div className="name-status-area">
                     <h3>{chat_information[1]}</h3>
-                    {(onlineUsers.includes(chat_information[0])? <sub style={{fontFamily: 'Roboto'}}>Online</sub> : <sub style={{fontFamily: 'Roboto'}}>Offline</sub>)}
+                    {(onlineUsers.includes(chat_information[3])? <sub style={{fontFamily: 'Roboto'}}>Online</sub> : <sub style={{fontFamily: 'Roboto'}}>Offline</sub>)}
                 </div>
                 <button onClick={()=>{closeChat()}} className="close-chat-button">close chat</button>
             </div>

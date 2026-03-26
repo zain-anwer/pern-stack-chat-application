@@ -30,6 +30,10 @@ io.on("connection",(socket)=>
     console.log("User Connected - ",socket.user?.name)
     userSocketMap[socket.userId] = socket.id
 
+    // converting the dictionary into an array of keys and printing it for validation purposes
+    
+    console.log("List of connected users now: ",Object.keys(userSocketMap))
+
     // io.emit is used to broadcast to all available clients
 
     io.emit("getOnlineUsers",Object.keys(userSocketMap))

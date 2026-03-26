@@ -252,6 +252,7 @@ export const sendMessage = async (req,res) =>
         // group_chats cause conversation_id will be created at group creation
         const {conversation_id} = req.params;
         const {message} = req.body;
+        let convo_id;
         let message_insertion_result;
 
         if (receiver_id)
@@ -263,8 +264,8 @@ export const sendMessage = async (req,res) =>
           if (result1.rows.length != 0) 
           {
             // will bother with checks later
-            const existing_convo_id = result1.rows[0].conversation_id;
-            message_insertion_result = await client.query(message_insert,[sender_id,existing_convo_id,message]);
+            convo_id = result1.rows[0].conversation_id;
+            message_insertion_result = await client.query(message_insert,[sender_id,convo_id,message]);
           }
 
           /* new conversation */
@@ -274,7 +275,7 @@ export const sendMessage = async (req,res) =>
             // defining a transaction for convo creation, member insertion, and message insertion
             await client.query("BEGIN;");
             const convo_creation_result = await client.query(convo_creation,[false,null]);
-            const convo_id = convo_creation_result.rows[0].conversation_id;
+            convo_id = convo_creation_result.rows[0].conversation_id;
             message_insertion_result = await client.query(message_insert_new_convo,[sender_id,convo_id,message]);
             await client.query(member_insert_new_convo_chat,[convo_id,receiver_id]);  
             await client.query(member_insert_new_convo_chat,[convo_id,sender_id]);
@@ -292,6 +293,7 @@ export const sendMessage = async (req,res) =>
             return res.status(401).json({message:"User not part of this conversation - User is a nosy creep"});
           }
           message_insertion_result = await client.query(message_insert,[sender_id,conversation_id,message]);
+          convo_id = conversation_id
         }
 
         else 
@@ -300,11 +302,16 @@ export const sendMessage = async (req,res) =>
         /* update socket functionality later */
         /* alot to deal with right now ¬_¬ */
 
-        if (receiver_id)
+        const receiver_ids = await pool.query("SELECT member_id FROM Conversation_Members where conversation_id = $1;",[convo_id])
+        
+        for (const id of receiver_ids.rows)
         {
-
-          const receiverSocket = getReceiverSocket(receiver_id)
-
+          // don't send the message back to the same person
+          if (id.member_id == sender_id)
+            continue;
+          
+          const receiverSocket = getReceiverSocket(id.member_id)
+          console.log("Sending message to receiver with user_id: ",id.member_id);
           if (receiverSocket)
             io.to(receiverSocket).emit("getMessage",message_insertion_result.rows[0])
           else

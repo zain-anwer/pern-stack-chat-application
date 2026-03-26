@@ -10,7 +10,7 @@ const ChatList = ({readRefreshes,setChatSelected}) =>
     const selectChat = (conversation_id,display_name,is_group,other_user_id) =>
     {
         setChatSelected([conversation_id,display_name,is_group,other_user_id])
-        console.log("Chat selected with display id: ",display_id)
+        console.log("Chat selected with conversation id: ",conversation_id)
     }
     
     
