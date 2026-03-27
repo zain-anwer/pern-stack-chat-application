@@ -23,8 +23,7 @@ const messages_query = `
 
         AND EXISTS (SELECT * from Conversation_Members cm WHERE cm.member_id = $1 AND cm.conversation_id = $2)
   
-      ORDER BY Messages.sent_at ASC
-      LIMIT 100;
+      ORDER BY Messages.sent_at ASC;
     `;
 
 const chatlist_query = `
@@ -94,7 +93,7 @@ const message_insert = `INSERT INTO Messages(sender_id,conversation_id,message) 
                         RETURNING message_id, sender_id, message, sent_at;`
   
 // if new chat/group is created (the three queries below will run as a transaction)
-
+ 
 const convo_creation = `INSERT INTO Conversations(is_group,name) VALUES ($1,$2) RETURNING conversation_id;`
 const message_insert_new_convo = `INSERT INTO Messages(sender_id,conversation_id,message) VALUES($1,$2,$3) 
                                   RETURNING message_id, sender_id, message, sent_at;`
@@ -194,6 +193,23 @@ export const getMessages = async (req, res) => {
       sent_at: row.sent_at,
       status: row.status,
     }));
+
+    // sending read event to the other members of this conversation to update message view
+
+    const members = await client.query("SELECT member_id FROM Conversation_Members WHERE conversation_id = $1 AND member_id != $2",[conversation_id,currentUserId]);
+
+    if (members.rows.length > 0)
+    {
+      members.rows.forEach(row => {
+        const member_socket = getReceiverSocket(row.member_id)
+        io.to(member_socket).emit("readMessages",{
+          conversation_id,
+          readBy: currentUserId
+        })
+      })
+    }
+
+
     
     // 200 OK – request successful, response contains result
 
@@ -276,9 +292,9 @@ export const sendMessage = async (req,res) =>
             await client.query("BEGIN;");
             const convo_creation_result = await client.query(convo_creation,[false,null]);
             convo_id = convo_creation_result.rows[0].conversation_id;
-            message_insertion_result = await client.query(message_insert_new_convo,[sender_id,convo_id,message]);
             await client.query(member_insert_new_convo_chat,[convo_id,receiver_id]);  
             await client.query(member_insert_new_convo_chat,[convo_id,sender_id]);
+            message_insertion_result = await client.query(message_insert_new_convo,[sender_id,convo_id,message]);
             await client.query("COMMIT;");
           }
         }
@@ -302,8 +318,10 @@ export const sendMessage = async (req,res) =>
         /* update socket functionality later */
         /* alot to deal with right now ¬_¬ */
 
-        const receiver_ids = await pool.query("SELECT member_id FROM Conversation_Members where conversation_id = $1;",[convo_id])
+        const receiver_ids = await client.query("SELECT member_id FROM Conversation_Members where conversation_id = $1;",[convo_id])
         
+        let is_delivered = false;
+
         for (const id of receiver_ids.rows)
         {
           // don't send the message back to the same person
@@ -313,11 +331,26 @@ export const sendMessage = async (req,res) =>
           const receiverSocket = getReceiverSocket(id.member_id)
           console.log("Sending message to receiver with user_id: ",id.member_id);
           if (receiverSocket)
+          {
             io.to(receiverSocket).emit("getMessage",message_insertion_result.rows[0])
+            const result = await pool.query("UPDATE Message_Status SET status = 'delivered' WHERE receiver_id = $1 and message_id = $2;",[id.member_id,message_insertion_result.rows[0].message_id])
+            /* even if one receiver gets it */
+            is_delivered = true;
+          }
           else
             console.log("User Offline/Error in socket creation")
         }
 
+        // this socket event will trigger rerender of messages in the frontend
+
+        const senderSocket = getReceiverSocket(sender_id);
+        if (senderSocket) {
+          io.to(senderSocket).emit("messageDelivered", {
+            message_id: message_insertion_result.rows[0].message_id,
+            status: (is_delivered) ? 'delivered' : 'sent'
+          });
+        }
+        console.log(message_insertion_result)
         res.status(201).send(
         {
           success : true,
@@ -375,6 +408,19 @@ export const readMessage = async (req,res) => {
     const receiver_id = req.userId
 
     const result = await pool.query("UPDATE Message_Status SET status = 'read' WHERE message_id = $1 AND receiver_id = $2 RETURNING *;",[message_id,receiver_id]);
+  
+    // emit event if no error is thrown
+
+    const sender = await pool.query("SELECT sender_id FROM Messages where message_id = $1",[message_id])
+    console.log("Emitting read update to sender with id : ",sender.rows[0].sender_id)
+
+    const sender_socket = getReceiverSocket(sender.rows[0].sender_id);
+    io.to(sender_socket).emit("readSingleMessage",{
+      message_id,
+      readBy: receiver_id,
+      status: 'read'
+    })
+    
     return res.status(200).json({
       success: true,
       result
