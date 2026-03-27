@@ -36,7 +36,7 @@ form {
     min-height: 6vh;
     border-style: solid;
     border-width: 2px;
-    border-radius: 5%;
+    border-radius: 5px;
     transition: none;
     background-color: transparent;
     font-family: inherit;
@@ -49,9 +49,10 @@ input:focus {
 }
 
 .container{
-
+    margin-top: 5vh;
+    margin-bottom: 5vh;
     justify-content: center;
-    align-items: stretch;
+    align-items: center stretch;
     display:flex;
     padding: 0px;
     gap: 0;
@@ -66,6 +67,8 @@ input:focus {
     align-items: center;
     min-height: 80vh;
     min-width: 40vw;
+    max-height: 90vh;
+    max-width: 45vh;
     padding: 2%;
     background-color: rgb(255,255,255,0.2);
     backdrop-filter: blur(10px);

@@ -3,7 +3,7 @@ import { MessageCircleMore, User, Lock, Mail } from "lucide-react"
 import { axiosInstance } from "../lib/axios"
 import { socketInstance } from "../lib/socket"
 import { Link,useNavigate } from "react-router-dom"
-import "./SignUpPage.css"
+import "./AuthPage.css"
 import { toast } from "react-hot-toast"
 
 
@@ -54,11 +54,8 @@ const SignUpPage = ({setAuth})=>{
                     
                     <p>Signup To Begin Chatting!</p>
                     
-                    <MessageCircleMore size={40}/>
-                    
-                    <br/>
-                    <br/>
-                    
+                    <img style={{width:'7vw'}} src='../../images/chat_image.png'/>
+
                     <form onSubmit={handleSubmit}>
                         
                         <label>Name
@@ -96,6 +93,7 @@ const SignUpPage = ({setAuth})=>{
 
                 </div>
                 <div className="picture-area">
+                    <img src='../../images/chat_poster.png'/>
                 </div>
             </div>
         </>

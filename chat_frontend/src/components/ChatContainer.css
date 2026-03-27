@@ -73,3 +73,16 @@ input {
     margin-left: auto;
     border-radius: 999px;
 }
+
+.dp-area{
+    width: 47px;
+    height: 47px;
+    border-radius: 50%;
+    margin-right: 5px;
+}
+
+.dp{
+    height: 100%;
+    width: 100%;
+    object-fit: contain;
+}

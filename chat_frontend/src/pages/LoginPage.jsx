@@ -4,7 +4,7 @@ import { axiosInstance } from "../lib/axios"
 import { socketInstance } from "../lib/socket"
 import { Link,useNavigate } from "react-router-dom"
 import { toast } from "react-hot-toast"
-import "./LoginPage.css"
+import "./AuthPage.css"
 
 const LoginPage = ({setAuth})=>{
 
@@ -54,10 +54,8 @@ const LoginPage = ({setAuth})=>{
                     
                     <p>Login To Begin Chatting!</p>
                     
-                    <MessageCircleMore size={40}/>
+                    <img style={{width:'7vw'}} src='../../images/chat_image.png'/>
                     
-                    <br/>
-                    <br/>
                     
                     <form onSubmit={handleSubmit}>
                         
@@ -89,6 +87,7 @@ const LoginPage = ({setAuth})=>{
 
                 </div>
                 <div className="picture-area">
+                    <img src='../../images/chat_poster.png'/>
                 </div>
             </div>
         </>

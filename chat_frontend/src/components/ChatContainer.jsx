@@ -162,8 +162,11 @@ const ChatContainer = ({chat_information,setChatSelected,setReadRefreshes,online
     return (
         <>
             <div className="opened-chat-info-area">
+                <div className="dp-area">
+                    <img className="dp" src='../../images/default_dp.png'/>
+                </div>
                 <div className="name-status-area">
-                    <h3>{chat_information[1]}</h3>
+                    <h3 style={{fontFamily:'Inter'}}>{chat_information[1]}</h3>
                     {(onlineUsers.includes(chat_information[3])? <sub style={{fontFamily: 'Roboto'}}>Online</sub> : <sub style={{fontFamily: 'Roboto'}}>Offline</sub>)}
                 </div>
                 <button onClick={()=>{closeChat()}} className="close-chat-button">close chat</button>
