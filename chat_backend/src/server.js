@@ -13,6 +13,8 @@ import {app, server, io} from './lib/socket.js'
 
 const PORT = process.env.PORT || 3000;
 
+console.log("CLIENT_URL is:", process.env.CLIENT_URL)
+
 // middleware
 
 app.use(express.json());
