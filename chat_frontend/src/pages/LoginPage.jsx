@@ -54,7 +54,7 @@ const LoginPage = ({setAuth})=>{
                     
                     <p>Login To Begin Chatting!</p>
                     
-                    <img style={{width:'7vw'}} src='../../images/chat_image.png'/>
+                    <img style={{width:'7vw'}} src='/images/chat_image.png'/>
                     
                     
                     <form onSubmit={handleSubmit}>
@@ -87,7 +87,7 @@ const LoginPage = ({setAuth})=>{
 
                 </div>
                 <div className="picture-area">
-                    <img src='../../images/chat_poster.png'/>
+                    <img src='/images/chat_poster.png'/>
                 </div>
             </div>
         </>

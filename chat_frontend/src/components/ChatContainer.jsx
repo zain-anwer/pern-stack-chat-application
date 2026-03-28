@@ -175,7 +175,7 @@ const ChatContainer = ({chat_information,setChatSelected,setReadRefreshes,online
         <>
             <div className="opened-chat-info-area">
                 <div className="dp-area">
-                    <img className="dp" src='../../images/default_dp.png'/>
+                    <img className="dp" src='/images/default_dp.png'/>
                 </div>
                 <div className="name-status-area">
                     <h3 style={{fontFamily:'Inter'}}>{chat_information[1]}</h3>
