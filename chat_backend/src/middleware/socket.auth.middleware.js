@@ -10,7 +10,10 @@ dotenv.config()
 const socketAuthMiddleware = async (socket,next) =>
 {
     try{
-        const token = socket.handshake.headers.cookie?.split("; ").find(row => row.startsWith("jwt"))?.split("=")[1]
+        const token = socket.handshake.auth?.token || 
+              socket.handshake.headers.cookie?.split("; ")
+                .find(row => row.startsWith("jwt"))
+                ?.split("=")[1]
         
         if (!token) {
             console.log("Token not provided")

@@ -8,7 +8,14 @@ export const socketInstance = io(
     {
         withCredentials:true, 
         autoConnect: false,
-        transports: ['polling']
+        transports: ['polling'],
+        auth: (cb) => {
+            const token = document.cookie
+                .split('; ')
+                .find(row => row.startsWith('jwt='))
+                ?.split('=')[1]
+            cb({ token })
+        }
     }
 )
 
