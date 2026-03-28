@@ -20,7 +20,8 @@ const io = new Server(server,{
     }
 })
 
-io.use(socketAuthMiddleware)
+// this give horrible bad request errors for some reason
+// io.use(socketAuthMiddleware)
 
 
 // takes the name of the event and the callback function
