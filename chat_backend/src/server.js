@@ -1,6 +1,8 @@
+import dotenv from 'dotenv';
+dotenv.config()
+
 import cors from 'cors';
 import express from 'express';
-import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
 
 import authRoutes from './routes/auth.route.js';
@@ -8,7 +10,7 @@ import messageRoutes from './routes/message.route.js';
 import {app, server, io} from './lib/socket.js'
 
 
-dotenv.config();
+
 const PORT = process.env.PORT || 3000;
 
 // middleware
