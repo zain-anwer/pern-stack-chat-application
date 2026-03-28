@@ -1,8 +1,11 @@
 import express from 'express'
+import dotenv from 'dotenv'
 import http from 'http'
 import { pool } from './db.js'
 import { Server } from 'socket.io'
 import socketAuthMiddleware from '../middleware/socket.auth.middleware.js'
+
+dotenv.config()
 
 const app = express()
 
@@ -12,7 +15,7 @@ const server = http.createServer(app)
 
 const io = new Server(server,{
     cors:{
-        origin: CLIENT_URL, // frontend URL
+        origin: process.env.CLIENT_URL, // frontend URL
         credentials: true // allows cookies
     }
 })
