@@ -4,26 +4,28 @@ import {io, getReceiverSocket} from '../lib/socket.js';
 /*--------------------------------------- QUERIES --------------------------------------------------*/
 
 const messages_query = `
-      
-      SELECT 
-        Messages.message_id, 
-        Messages.sender_id, 
-        Messages.message, 
-        Messages.sent_at, 
-        Message_Status.status
-      
-      FROM Messages 
-      JOIN Message_Status 
-        ON Messages.message_id = Message_Status.message_id
-  
-      WHERE
-        Messages.conversation_id = $2
-
-        -- a little auth check (requesting person should be part of the convo and not a nosy lil...)
-
-        AND EXISTS (SELECT * from Conversation_Members cm WHERE cm.member_id = $1 AND cm.conversation_id = $2)
-  
-      ORDER BY Messages.sent_at ASC;
+        SELECT * FROM (
+          SELECT 
+              Messages.message_id, 
+              Messages.sender_id, 
+              Messages.message, 
+              Messages.sent_at, 
+              Message_Status.status
+          FROM Messages 
+          JOIN Message_Status 
+              ON Messages.message_id = Message_Status.message_id
+          WHERE
+              Messages.conversation_id = $2
+              -- Your solid auth check
+              AND EXISTS (
+                  SELECT 1 FROM Conversation_Members cm 
+                  WHERE cm.member_id = $1 AND cm.conversation_id = $2
+              )
+          -- Step 1: Get the 100 newest messages
+          ORDER BY Messages.sent_at DESC 
+          LIMIT 100
+      ) AS subquery_alias
+      ORDER BY sent_at ASC;
     `;
 
 const chatlist_query = `

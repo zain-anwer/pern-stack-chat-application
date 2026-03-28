@@ -21,6 +21,8 @@ const ChatContainer = ({chat_information,setChatSelected,setReadRefreshes,online
     {   
         const readSingleMessageHandler = ({message_id,readBy,status}) =>
         {
+            if (readBy != chat_information[3])
+                return;
             console.log("Updating message status to 'read' for message with id: ",message_id)
             setTimeout(() => {
                 setMessages(prev => prev.map((message) => 
@@ -36,7 +38,7 @@ const ChatContainer = ({chat_information,setChatSelected,setReadRefreshes,online
 
             setTimeout(() => {
                 setMessages(prev => 
-                    prev.map((message) => (message.message_id == message_id) ? {...message,status} : message
+                    prev.map((message) => (message.message_id == message_id && message.status != 'read') ? {...message,status} : message
                 ))
             },500)
         }
@@ -49,7 +51,7 @@ const ChatContainer = ({chat_information,setChatSelected,setReadRefreshes,online
             socketInstance.off("readSingleMessage",readSingleMessageHandler)
         }
 
-    },[])
+    },[chat_information])
 
     useEffect(()=>
     {
@@ -63,7 +65,7 @@ const ChatContainer = ({chat_information,setChatSelected,setReadRefreshes,online
         if (!chat_information) return;
 
         const readMessageshandler = ({conversation_id,readBy}) => {
-            if (chat_information[0] && chat_information[0] == conversation_id)
+            if (chat_information[0] && chat_information[0] == conversation_id && readBy == chat_information[3])
                 setTimeout(()=>{
                     setMessages(prev => 
                         prev.map(msg => ({ ...msg, status: 'read' }))
@@ -73,7 +75,10 @@ const ChatContainer = ({chat_information,setChatSelected,setReadRefreshes,online
 
         const handler = async (new_message) =>
         {
-            setMessages(prev => [...prev,new_message])
+            if (new_message.sender_id == chat_information[3])
+                setMessages(prev => [...prev,new_message])
+            else 
+                return;
             
             try {
                 console.log("Message Id: ",new_message.message_id)
@@ -147,6 +152,7 @@ const ChatContainer = ({chat_information,setChatSelected,setReadRefreshes,online
                 res = await axiosInstance.post(`/send/chat/${chat_information[3]}`,{message:currentMessage,userId:currentUserId})
             setCurrentMessage("")
             setMessages(prev => [...prev, { ...res.data.new_message, status: 'sent' }])
+            
         }
         catch(error) {
             toast.error(error.response.data.message || "Something went wrong")
