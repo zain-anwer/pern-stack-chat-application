@@ -7,7 +7,8 @@ export const socketInstance = io(
     BASE_URL,
     {
         withCredentials:true, 
-        autoConnect: false
+        autoConnect: false,
+        transports: ['polling']
     }
 )
 
