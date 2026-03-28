@@ -113,7 +113,7 @@ const ChatContainer = ({chat_information,setChatSelected,setReadRefreshes,online
                     if (!find_convo_result.data.success)
                     {
                         setMessages([])
-                        return
+                        return;
                     }
                     res = await axiosInstance.get(`/messages/${find_convo_result.data.conversation_id}`)
                 }
@@ -124,7 +124,13 @@ const ChatContainer = ({chat_information,setChatSelected,setReadRefreshes,online
                 setReadRefreshes(prev => prev + 1)
             }
             catch(error) {
-                toast.error(error.response.data.message || "Something Went Down/Wrong!")
+                if (error.response && error.response.status === 404)
+                {
+                    toast.error("No conversation for this chat so far")
+                    setMessages([])
+                }
+                else
+                    toast.error(error.response.data.message || "Something Went Down/Wrong!")
             }
         }
         getMessages()
@@ -181,7 +187,7 @@ const ChatContainer = ({chat_information,setChatSelected,setReadRefreshes,online
                 { (messages.length != 0) ? 
                     (messages.map(
                         (message) => 
-                            <MessageBubble key={message.message_id} message={message.message} sent_at={message.sent_at} status={message.status} mine={(message.sender_id == currentUserId)? true:false}/>
+                            <MessageBubble key={message.message_id} message={message.message} sent_at={message.sent_at} status={message.status} mine={(message.sender_id === currentUserId)? true:false}/>
                         )
                     ) 
                     : 

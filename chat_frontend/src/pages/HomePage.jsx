@@ -43,9 +43,19 @@ const HomePage = ({setAuth,onlineUsers})=> {
                <ProfileHeader profile={profile} setAuth={setAuth}/>
             </div>
             <div className="active-tab-area">
-               <button onClick={()=>{setActiveTab("chats")}} className="chats-button">Chats</button>
-               <h1>|</h1>
-               <button onClick={()=>{setActiveTab("contacts")}} className="contacts-button">Contacts</button>
+               <button 
+                  onClick={() => setActiveTab("chats")} 
+                  className={`chats-button ${activeTab === "chats" ? "active" : ""}`}
+               >
+                  Chats
+               </button>
+               
+               <button 
+                  onClick={() => setActiveTab("contacts")} 
+                  className={`contacts-button ${activeTab === "contacts" ? "active" : ""}`}
+               >
+                  Contacts
+               </button>
             </div>
             <div className="chatlist-area">
                { (activeTab === "chats") ? <ChatList setReadRefreshes={setReadRefreshes} readRefreshes={readRefreshes} setChatSelected={setChatSelected}/> : <ContactList setChatSelected={setChatSelected}/> }

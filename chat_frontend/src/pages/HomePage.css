@@ -57,17 +57,42 @@
     overflow-y: auto;
 }
 
-.active-tab-area{
-    padding-top: 5%;
+.active-tab-area {
+    margin-top: 5%;
     display: flex;
     align-items: center;
     justify-content: center;
     width: 100%;
-    gap: 0.1rem;
+    /* Create a pill-shaped background for both buttons */
+    background-color: rgba(245, 238, 238, 0.1);
+    padding: 5px;
+    border-radius: 12px;
+    gap: 5px;
 }
 
 .contacts-button,
 .chats-button {
-    width: 35%;
-    background-color: rgb(75, 77, 216);
+    flex: 1; /* Makes both buttons equal width */
+    padding: 10px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    color: #fff;
+    background-color: transparent; /* Default state is transparent */
+    transition: all 0.2s ease-in-out;
+}
+
+/* Hover effect for inactive tabs */
+.contacts-button:hover,
+.chats-button:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* The "Active" state styles */
+.contacts-button.active,
+.chats-button.active {
+    background-color: rgb(75, 77, 216); /* Your original blue */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
