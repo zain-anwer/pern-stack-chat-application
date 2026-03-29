@@ -9,7 +9,18 @@ import authRoutes from './routes/auth.route.js';
 import messageRoutes from './routes/message.route.js';
 import {app, server, io} from './lib/socket.js'
 
+/* --------------------- bebugging socket code -----------------------------------------------------*/
 
+
+process.on('uncaughtException', (err) => {
+    console.error('UNCAUGHT EXCEPTION:', err)
+})
+
+process.on('unhandledRejection', (reason) => {
+    console.error('UNHANDLED REJECTION:', reason)
+})
+
+/* ------------------------------------------------------------------------------------*/
 
 const PORT = process.env.PORT || 3000;
 
