@@ -86,7 +86,7 @@ export const login = async (req,res) =>
                 return res.status(401).json({message:"Incorrect Password"});
             }
 
-            const id = result.rows[0].user_id.toString();
+            const id = result.rows[0].user_id;
             const fullname = result.rows[0].name;
             const token = generateToken(result.rows[0].user_id,res);
 

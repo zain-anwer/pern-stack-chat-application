@@ -20,7 +20,8 @@ const io = new Server(server,{
     }
 })
 
-// this give horrible bad request errors for some reason
+// socket auth middleware
+
 // io.use(socketAuthMiddleware)
 
 
@@ -37,6 +38,16 @@ const getReceiverSocket = (user_id) =>
 io.on("connection", async (socket)=>
 {
     console.log("User Connected - ",socket.user?.name)
+
+    socket.on("authenticate",({userId}) => {
+        if (!userId)
+        {
+            socket.disconnect()
+            return
+        }
+        socket.userId = userId
+    })
+
     userSocketMap[socket.userId] = socket.id
 
     // converting the dictionary into an array of keys and printing it for validation purposes

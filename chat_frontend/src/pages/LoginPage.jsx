@@ -1,7 +1,7 @@
 import { useState } from "react"
-import { MessageCircleMore,Mail,Lock } from "lucide-react"
+import { Mail,Lock } from "lucide-react"
 import { axiosInstance } from "../lib/axios"
-import { socketInstance } from "../lib/socket"
+import { authenticateSocket, socketInstance } from "../lib/socket"
 import { Link,useNavigate } from "react-router-dom"
 import { toast } from "react-hot-toast"
 import "./AuthPage.css"
@@ -31,7 +31,11 @@ const LoginPage = ({setAuth})=>{
                 toast.success("Login Successful")
                 await setAuth(true)
                 navigate("/")
-                if (!socketInstance.connected) socketInstance.connect();
+                if (!socketInstance.connected)
+                {
+                    socketInstance.connect();
+                    authenticateSocket(res.data.id);
+                }
             }
             else 
                 toast.error("Login Unsuccessful")

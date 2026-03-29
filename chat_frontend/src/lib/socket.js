@@ -8,14 +8,13 @@ export const socketInstance = io(
     {
         withCredentials:true, 
         autoConnect: false,
-        transports: ['polling'],
-        auth: (cb) => {
-            const token = document.cookie
-                .split('; ')
-                .find(row => row.startsWith('jwt='))
-                ?.split('=')[1]
-            cb({ token })
-        }
+        transports: ['polling']
     }
 )
 
+// will call this immediately after connecting to sent the userId
+// cookies are httpOnly so apparently frontend cannot read it
+
+export const authenticateSocket = (userId) => {
+    socketInstance.emit("authenticate", { userId })
+}
