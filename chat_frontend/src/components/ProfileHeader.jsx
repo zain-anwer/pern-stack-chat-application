@@ -26,7 +26,6 @@ const ProfileHeader = (props) => {
         {
             toast.error(error.response.data.message)
         }
-      
     }
 
     return (
