@@ -34,7 +34,7 @@ const LoginPage = ({setAuth})=>{
                 if (!socketInstance.connected)
                 {
                     socketInstance.connect();
-                    authenticateSocket(res.data.id);
+                    authenticateSocket(res.data.user.id,res.data.user.name);
                 }
             }
             else 

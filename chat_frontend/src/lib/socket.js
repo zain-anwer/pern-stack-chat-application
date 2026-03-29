@@ -15,6 +15,6 @@ export const socketInstance = io(
 // will call this immediately after connecting to sent the userId
 // cookies are httpOnly so apparently frontend cannot read it
 
-export const authenticateSocket = (userId) => {
-    socketInstance.emit("authenticate", { userId })
+export const authenticateSocket = (userId,userName) => {
+    socketInstance.emit("authenticate", { userId,userName })
 }

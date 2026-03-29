@@ -405,6 +405,7 @@ export const getConvoId = async (req,res) => {
 }
 
 export const readMessage = async (req,res) => {
+  
   try{
     const { message_id } = req.params
     const receiver_id = req.userId

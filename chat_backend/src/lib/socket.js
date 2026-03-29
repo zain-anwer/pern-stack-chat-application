@@ -3,7 +3,6 @@ import dotenv from 'dotenv'
 import http from 'http'
 import { pool } from './db.js'
 import { Server } from 'socket.io'
-import socketAuthMiddleware from '../middleware/socket.auth.middleware.js'
 
 dotenv.config()
 
@@ -20,11 +19,6 @@ const io = new Server(server,{
     }
 })
 
-// socket auth middleware
-
-// io.use(socketAuthMiddleware)
-
-
 // takes the name of the event and the callback function
 
 
@@ -35,54 +29,49 @@ const userSocketMap = {}
 const getReceiverSocket = (user_id) =>
 {   return userSocketMap[user_id]   }
 
-io.on("connection", async (socket)=>
+io.on("connection", async (socket) =>
 {
-    console.log("User Connected - ",socket.user?.name)
-
-    socket.on("authenticate",({userId}) => {
+    socket.on("authenticate", async ({ userId, userName }) => {
+        
         if (!userId)
         {
             socket.disconnect()
             return
         }
+        
+        console.log("User Connected - ", userName)
+        
         socket.userId = userId
+        socket.userName = userName
+
+        userSocketMap[socket.userId] = socket.id
+
+        console.log("List of connected users now: ", Object.keys(userSocketMap))
+
+        const pendingUsers = await pool.query(`SELECT DISTINCT Messages.sender_id 
+                                FROM Messages JOIN Message_Status
+                                ON Messages.message_id = Message_Status.message_id
+                                WHERE receiver_id = $1 AND status = 'sent';`, [socket.userId]);
+
+        await pool.query("UPDATE Message_Status SET status = 'delivered', delivered_at = NOW() WHERE status = 'sent' AND receiver_id = $1;", [socket.userId])
+
+        pendingUsers.rows.forEach(row => {
+            const sender_socket = getReceiverSocket(row.sender_id)
+            if (sender_socket)
+            {
+                io.to(sender_socket).emit("userBackOnline", { userId: socket.userId })
+            }
+        })
+
+        io.emit("getOnlineUsers", Object.keys(userSocketMap))
+
     })
 
-    userSocketMap[socket.userId] = socket.id
-
-    // converting the dictionary into an array of keys and printing it for validation purposes
-    
-    console.log("List of connected users now: ",Object.keys(userSocketMap))
-
-    // marking all messages sent to this user as delivered
-
-    const pendingUsers = await pool.query(`SELECT DISTINCT Messages.sender_id 
-                            FROM Messages JOIN Message_Status
-                            ON Messages.message_id = Message_Status.message_id
-                            WHERE receiver_id = $1 AND status = 'sent';`,[socket.userId]);
-
-    await pool.query("UPDATE Message_Status SET status = 'delivered', delivered_at = NOW() WHERE status = 'sent' AND receiver_id = $1;",[socket.userId])
-
-    pendingUsers.rows.forEach(row => {
-        const sender_socket = getReceiverSocket(row.sender_id)
-        if (sender_socket)
-        {
-            io.to(sender_socket).emit("userBackOnline",{userId:socket.userId})
-        }
-    })
-    
-    
-    // io.emit is used to broadcast to all available clients
-
-    io.emit("getOnlineUsers",Object.keys(userSocketMap))
-
-    // socket.on is used to listen to events
-
-    socket.on("disconnect",()=>
+    socket.on("disconnect", () =>
     {
         delete userSocketMap[socket.userId]
-        io.emit("getOnlineUsers",Object.keys(userSocketMap))
-        console.log("User Disconnected - ",socket.user?.name)
+        io.emit("getOnlineUsers", Object.keys(userSocketMap))
+        console.log("User Disconnected - ", socket.userName)
     })
 })
 

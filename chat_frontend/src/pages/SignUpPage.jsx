@@ -1,7 +1,7 @@
 import { useState } from "react"
-import { MessageCircleMore, User, Lock, Mail } from "lucide-react"
+import { User, Lock, Mail } from "lucide-react"
 import { axiosInstance } from "../lib/axios"
-import { socketInstance } from "../lib/socket"
+import { authenticateSocket,socketInstance } from "../lib/socket"
 import { Link,useNavigate } from "react-router-dom"
 import "./AuthPage.css"
 import { toast } from "react-hot-toast"
@@ -33,7 +33,7 @@ const SignUpPage = ({setAuth})=>{
                 if (!socketInstance.connected)
                 {
                     socketInstance.connect();
-                    authenticateSocket(res.data.id);
+                    authenticateSocket(res.data.user.id,res.data.user.name);
                 }
                 setAuth(true)
                 navigate("/")
