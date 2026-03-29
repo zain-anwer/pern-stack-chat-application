@@ -1,4 +1,5 @@
 import express from 'express'
+import cors from 'cors'
 import dotenv from 'dotenv'
 import http from 'http'
 import { pool } from './db.js'
@@ -7,6 +8,22 @@ import { Server } from 'socket.io'
 dotenv.config()
 
 const app = express()
+
+// cors setup
+
+app.use(cors({
+  origin: process.env.CLIENT_URL,
+  methods: ['GET','PUT','DELETE','POST'],
+  credentials: true
+}));
+
+// logging socket connection URLs
+
+app.use((req, res, next) => {
+    console.log(`SOCKET APP: ${req.method} ${req.url}`)
+    next()
+})
+
 
 // use the express app to create an http server
 const server = http.createServer(app)
@@ -31,6 +48,11 @@ const getReceiverSocket = (user_id) =>
 
 io.on("connection", async (socket) =>
 {
+
+    // to figure out whether socket is ever created and the problem is in the authenticate event
+
+    console.log("RAW CONNECTION - socket id:", socket.id)
+
     socket.on("authenticate", async ({ userId, userName }) => {
         
         if (!userId)

@@ -1,7 +1,6 @@
 import dotenv from 'dotenv';
 dotenv.config()
 
-import cors from 'cors';
 import express from 'express';
 import cookieParser from 'cookie-parser';
 
@@ -30,11 +29,6 @@ console.log("CLIENT_URL is:", process.env.CLIENT_URL)
 
 app.use(express.json());
 app.use(cookieParser());
-app.use(cors({
-  origin: process.env.CLIENT_URL,
-  methods: ['GET','PUT','DELETE','POST'],
-  credentials: true
-}));
 
 // logging middleware to check incoming URLs (I love(hate) debugging)
 
