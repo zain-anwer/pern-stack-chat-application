@@ -70,8 +70,7 @@ CLIENT_URL=http://localhost:5173
 
 Schema:
 
-<img width="1061" height="545" alt="supabase-schema-khawfekxfinuktyrcoiy" src="https://github.com/user-attachments/assets/13b8ea78-d767-4cd7-8eee-34de8cf2dce9" />
-
+<img width="1001" height="410" alt="supabase-schema-khawfekxfinuktyrcoiy" src="https://github.com/user-attachments/assets/e7b57463-174d-41ae-956d-6690b59d3e8f" />
 
 The entire schema — tables, triggers, indexes, and constraints — is defined in `chat_backend/db/init.sql`. Simply copy and paste its contents into your PostgreSQL command line or any SQL editor (pgAdmin, DBeaver, Supabase SQL editor, etc.) and run it. That's all you need to get the database ready.
 
