@@ -21,7 +21,8 @@ process.on('unhandledRejection', (reason) => {
 
 /* ------------------------------------------------------------------------------------*/
 
-const PORT = process.env.PORT || 3000;
+// default port = 7860 for hugging face spacess
+const PORT = process.env.PORT || 7860;
 
 console.log("CLIENT_URL is:", process.env.CLIENT_URL)
 

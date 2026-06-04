@@ -1,0 +1,50 @@
+name: Deploy Backend to HF Spaces
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "chat_backend/**"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          lfs: true
+
+      - name: Push backend to Hugging Face Spaces
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          HF_USERNAME: ${{ secrets.HF_USERNAME }}
+          HF_SPACE_NAME: ${{ secrets.HF_SPACE_NAME }}
+        run: |
+          # Configure git identity for the push
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+
+          # Clone the HF Space repo into a temp directory
+          git clone https://$HF_USERNAME:$HF_TOKEN@huggingface.co/spaces/$HF_USERNAME/$HF_SPACE_NAME hf_space
+
+          # Sync only the backend folder contents into the HF Space root
+          # --delete removes files from HF that no longer exist in backend/
+          rsync -av --delete \
+            --exclude='.git' \
+            backend/ hf_space/
+
+          cd hf_space
+
+          # Stage and commit only if there are actual changes
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No changes to deploy."
+          else
+            git commit -m "Deploy from GitHub Actions @ $(date -u '+%Y-%m-%dT%H:%M:%SZ') [${GITHUB_SHA::7}]"
+            git push
+            echo "Deployed successfully."
+          fi
