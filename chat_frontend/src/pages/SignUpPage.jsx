@@ -74,7 +74,7 @@ const SignUpPage = ({setAuth})=>{
                         <label>Email
                             <div className="input-group">
                                 <Mail/>
-                                <input type="email" placeholder="spongebob.squarepants@gmail.com"
+                                <input type="email" placeholder="spongebob@gmail.com"
                                     value={formData.email} onChange={(e)=>{setFormData({...formData,email:e.target.value})}}
                                 />
                             </div>
