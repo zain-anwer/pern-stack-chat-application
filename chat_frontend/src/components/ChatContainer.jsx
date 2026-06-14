@@ -8,11 +8,10 @@ import './ChatContainer.css'
 
 /* chat_information = [conversation_id,display_name,is_group,other_user_id] */
 
-const ChatContainer = ({chat_information,setChatSelected,setReadRefreshes,onlineUsers}) =>
+const ChatContainer = ({currentUserId,chat_information,setChatSelected,setReadRefreshes,onlineUsers}) =>
 {
     const scrollRef = useRef(null)
     const [messages,setMessages] = useState([])
-    const [currentUserId,setCurrentUserId] = useState(null)
     const [currentMessage,setCurrentMessage] = useState("")
 
     /* UseEffect for socket ~_~ */
@@ -120,7 +119,6 @@ const ChatContainer = ({chat_information,setChatSelected,setReadRefreshes,online
                 console.log(res)
                 
                 setMessages(res.data.messages)
-                setCurrentUserId(res.data.currentUserId)
                 setReadRefreshes(prev => prev + 1)
             }
             catch(error) {

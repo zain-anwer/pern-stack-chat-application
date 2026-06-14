@@ -19,6 +19,7 @@ function App() {
 
   const [userAuthenticated,authenticate] = useState(null)
   const [onlineUsers,setOnlineUsers] = useState([])
+  const [currentUserId,setCurrentUserId] = useState([])
 
   useEffect( () => {
     const checkAuth = async () =>
@@ -26,8 +27,10 @@ function App() {
       try{
          const res = await axiosInstance.get("/auth/check")
         if (res.data.userId)
+        {
           authenticate(true)
-        
+          setCurrentUserId(res.data.userId)
+        }
         // to reconnect socket on re-renders
         if (!socketInstance.connected) socketInstance.connect();
       }
@@ -76,7 +79,7 @@ function App() {
       <Toaster/>
       <div className="main-layout">
         <Routes>
-          <Route path="/" element= {userAuthenticated? <HomePage setAuth={authenticate} onlineUsers={onlineUsers} /> : <LoginPage setAuth={authenticate}/>} />
+          <Route path="/" element= {userAuthenticated? <HomePage setAuth={authenticate} currentUserId = {currentUserId} onlineUsers={onlineUsers} /> : <LoginPage setAuth={authenticate}/>} />
           <Route path="/SignUpPage" element={<SignUpPage setAuth={authenticate}/>} />
           <Route path="/LoginPage" element={<LoginPage setAuth={authenticate}/>} />
         </Routes>
