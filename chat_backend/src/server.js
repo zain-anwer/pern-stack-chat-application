@@ -10,7 +10,8 @@ import cookieParser from 'cookie-parser';
 
 import authRoutes from './routes/auth.route.js';
 import messageRoutes from './routes/message.route.js';
-import {app, server, io} from './lib/socket.js'
+import {app, server, io} from './lib/socket.js';
+import {pool} from './lib/db.js'
 
 /* --------------------- bebugging socket code -----------------------------------------------------*/
 
@@ -52,13 +53,14 @@ app.use("/api", messageRoutes);
 
 // HEALTH API FOR HUGGING FACE SPACES
 
-app.get("/",(req,res) => {
-  return res.status(200).json(
-    {
-      "status":200,
-      "service":"Bubble Chat Backend"
-    }
-  )
+app.get("/", async (req, res) => {
+  try {
+    // a simple read statement to keep the database from pausing 
+    await pool.query('SELECT 1;')
+    return res.status(200).json({ status: 200, service: "Bubble Chat Backend", db: "ok" })
+  } catch (e) {
+    return res.status(503).json({ status: 503, service: "Bubble Chat Backend", db: "error" })
+  }
 })
 
 server.listen(PORT,()=>{
