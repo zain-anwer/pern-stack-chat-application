@@ -48,6 +48,16 @@ app.use((req, res, next) => {
 app.use("/api/auth", authRoutes);
 app.use("/api", messageRoutes);
 
+// HEALTH API FOR HUGGING FACE SPACES
+
+app.get("/",(req,res) => {
+  return res.status(200).json(
+    {
+      "status":200,
+      "service":"Bubble Chat Backend"
+    }
+  )
+})
 
 server.listen(PORT,()=>{
   console.log("Hello Sinners!")
