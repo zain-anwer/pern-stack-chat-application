@@ -35,7 +35,7 @@ jobs:
           # --delete removes files from HF that no longer exist in backend/
           rsync -av --delete \
             --exclude='.git' \
-            backend/ hf_space/
+            chat_backend/ hf_space/
 
           cd hf_space
 
