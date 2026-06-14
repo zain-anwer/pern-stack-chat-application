@@ -5,8 +5,6 @@ A real-time PERN stack chat application built as a rite of passage on my backend
 
 🔗 **Live Demo:** [bubble-pern-chat-app.vercel.app](https://bubble-pern-chat-app.vercel.app)
 
-> **Note:** The deployed version won't have real-time features active — the backend is hosted on a serverless platform that doesn't support persistent socket connections. Clone and run locally for the full experience.
-
 ---
 
 ## Features
