@@ -65,7 +65,7 @@ const SignUpPage = ({setAuth})=>{
                         <label>Name
                             <div className="input-group">
                                 <User/>
-                                <input type="text" placeholder="Kim Kardashian"
+                                <input type="text" placeholder="Spongebob Squarepants"
                                     value={formData.name} onChange={(e)=>{setFormData({...formData,name:e.target.value})}}
                                 />
                             </div>
@@ -74,7 +74,7 @@ const SignUpPage = ({setAuth})=>{
                         <label>Email
                             <div className="input-group">
                                 <Mail/>
-                                <input type="email" placeholder="kim.kardashian@gmail.com"
+                                <input type="email" placeholder="spongebob.squarepants@gmail.com"
                                     value={formData.email} onChange={(e)=>{setFormData({...formData,email:e.target.value})}}
                                 />
                             </div>
