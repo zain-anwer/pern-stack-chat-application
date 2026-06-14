@@ -19,4 +19,4 @@ EXPOSE 7860
 RUN chown -R 1000:1000 /app
 USER 1000
 
-CMD ["node", "server.js"]
+CMD ["node", "src/server.js"]
