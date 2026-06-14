@@ -206,7 +206,7 @@ const ChatContainer = ({currentUserId,chat_information,setChatSelected,setReadRe
         setChatSelected([])
     }
 
-
+    console.log("currentUserId:", currentUserId, "first message sender_id:", messages[0]?.sender_id)
     return (
         <> 
             <div className="opened-chat-info-area">
@@ -223,7 +223,7 @@ const ChatContainer = ({currentUserId,chat_information,setChatSelected,setReadRe
                 { (messages.length != 0) ? 
                     (messages.map(
                         (message) => 
-                            <MessageBubble key={message.message_id} message={message.message} sent_at={message.sent_at} status={message.status} mine={(message.sender_id === currentUserId)? true:false}/>
+                            <MessageBubble key={message.message_id} message={message.message} sent_at={message.sent_at} status={message.status} mine={(message.sender_id == currentUserId)? true:false}/>
                         )
                     ) 
                     : 

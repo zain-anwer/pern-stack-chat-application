@@ -19,14 +19,15 @@ function App() {
 
   const [userAuthenticated,authenticate] = useState(null)
   const [onlineUsers,setOnlineUsers] = useState([])
-  const [currentUserId,setCurrentUserId] = useState([])
+  const [currentUserId,setCurrentUserId] = useState(null)
 
   useEffect( () => {
     const checkAuth = async () =>
     {
       try{
-         const res = await axiosInstance.get("/auth/check")
-        if (res.data.userId)
+        const res = await axiosInstance.get("/auth/check")
+        console.log("auth check:", res.data, "userId field:", res.data.userId)
+         if (res.data.userId)
         {
           authenticate(true)
           setCurrentUserId(res.data.userId)
