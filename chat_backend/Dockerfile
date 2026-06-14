@@ -16,7 +16,7 @@ ENV PORT=7860
 EXPOSE 7860
 
 # Use non-root user for security (HF Spaces requirement)
-RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
-USER appuser
+RUN chown -R 1000:1000 /app
+USER 1000
 
 CMD ["node", "server.js"]
