@@ -51,10 +51,13 @@ const ChatList = ({setReadRefreshes,readRefreshes,setChatSelected}) =>
     },[readRefreshes])
 
     return (
-        <div className="chats">
+        <div className="chats" style={{display: 'flex', flexDirection:'column', gap:0, alignItems:'center', justifyContent:'center'}}>
             { 
                 (chatList === null) ? 
-                    <p>No Chats Yet</p>
+                    <p>Loading Chats</p>
+                :
+                (chatList.length == 0) ? 
+                    <p>No chats yet</p>
                 :
                     (
                         // make a chat tile pleasee

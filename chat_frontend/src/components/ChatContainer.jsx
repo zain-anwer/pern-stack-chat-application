@@ -150,18 +150,56 @@ const ChatContainer = ({chat_information,setChatSelected,setReadRefreshes,online
 
     const sendMessage = async () =>
     {
+        // optimistic message to remove frontend latency and improve responsiveness
+        // we will make a temporary id and then replace remove the message with that id once the db side response comes
+
+        const messageText = currentMessage.trim()
+        
+        // checking for empty messages
+        if (messageText.length == 0)
+        {
+            toast("Please refrain from sending empty messages ಠ_ಠ")
+            return
+        }
+        
+        // generating a temporary id
+        const tempId = Date.now()
+
+        const optimisticMessage = {
+            'message_id': tempId,
+            'sender_id': currentUserId,
+            'message': messageText,
+            'sent_at': new Date().toISOString(),
+            'status': 'sending',
+        }
+        
+        setMessages(prev => [...prev,optimisticMessage])
+        setCurrentMessage("")
+
         try{
             let res;
             if (chat_information[2])
-                res = await axiosInstance.post(`/send/group-chat/${chat_information[0]}`,{message:currentMessage,userId:currentUserId})
+                res = await axiosInstance.post(`/send/group-chat/${chat_information[0]}`,{message:messageText,userId:currentUserId})
             else
-                res = await axiosInstance.post(`/send/chat/${chat_information[3]}`,{message:currentMessage,userId:currentUserId})
-            setCurrentMessage("")
-            setMessages(prev => [...prev, { ...res.data.new_message, status: 'sent' }])
+                res = await axiosInstance.post(`/send/chat/${chat_information[3]}`,{message:messageText,userId:currentUserId})
             
+            // replacing the optimistic message with the message in the db response
+            setMessages(prev =>
+                prev.map(msg =>
+                    msg.message_id === tempId
+                    ? { ...res.data.new_message, status: "sent" }
+                    : msg
+                )
+            );
         }
         catch(error) {
-            toast.error(error.response.data.message || "Something went wrong")
+            // error
+            toast.error(error.response.data.message || "Failed to send message")
+            // removing optimistic message
+            setMessages(
+                prev => 
+                    prev.filter(msg => msg.message_id !== tempId)
+            )
         }
     }
 
@@ -172,7 +210,7 @@ const ChatContainer = ({chat_information,setChatSelected,setReadRefreshes,online
 
 
     return (
-        <>
+        <> 
             <div className="opened-chat-info-area">
                 <div className="dp-area">
                     <img className="dp" src='/images/default_dp.png'/>
@@ -199,9 +237,12 @@ const ChatContainer = ({chat_information,setChatSelected,setReadRefreshes,online
           
             <form className="message-entry-area" onSubmit={handleSubmit}>
         
-                <input placeholder="Type a message" value={currentMessage} onChange={(e)=>{setCurrentMessage(e.target.value)
-                    console.log(e.target.value)
-                }}/>
+                <input 
+                    placeholder="Type a message" 
+                    value={currentMessage} 
+                    onChange={(e)=>{setCurrentMessage(e.target.value)}} 
+                />
+
                 <button type="submit" className="send-button"><SendHorizonal className="send-icon" size={30}/></button>
                 
             </form>
