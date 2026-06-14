@@ -1,3 +1,5 @@
+// can't shake this project off
+
 import dotenv from 'dotenv';
 dotenv.config()
 
