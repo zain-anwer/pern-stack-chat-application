@@ -28,7 +28,9 @@ process.on('unhandledRejection', (reason) => {
 // default port = 7860 for hugging face spacess
 const PORT = process.env.PORT || 7860;
 
+// debugging
 console.log("CLIENT_URL is:", process.env.CLIENT_URL)
+console.log("DB RAW:", JSON.stringify(process.env.DB_URI || process.env.DATABASE_URL));
 
 // middleware
 
