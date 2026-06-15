@@ -6,7 +6,7 @@ import { Link,useNavigate } from "react-router-dom"
 import { toast } from "react-hot-toast"
 import "./AuthPage.css"
 
-const LoginPage = ({setAuth})=>{
+const LoginPage = ({setAuth,setCurrentUserId})=>{
 
     // apparently you should store data in a state
     // useState function returns an array not an object
@@ -28,9 +28,10 @@ const LoginPage = ({setAuth})=>{
             const res = await axiosInstance.post("/auth/login",formData)
             if (res?.data?.success)
             {
-                toast.success("Login Successful")
-                await setAuth(true)
+                setAuth(true)
+                setCurrentUserId(res.data.user.id)
                 navigate("/")
+                toast.success("Login Successful")
                 if (!socketInstance.connected)
                 {
                     socketInstance.connect();

@@ -7,7 +7,7 @@ import "./AuthPage.css"
 import { toast } from "react-hot-toast"
 
 
-const SignUpPage = ({setAuth})=>{
+const SignUpPage = ({setAuth,setCurrentUserId})=>{
 
     // apparently you should store data in a state
     // useState function returns an array not an object
@@ -29,14 +29,15 @@ const SignUpPage = ({setAuth})=>{
             const res = await axiosInstance.post("/auth/signup",formData)
             if (res.data.success)
             {
+                setAuth(true)
+                setCurrentUserId(res.data.user.id)
+                navigate("/")
                 toast.success("Sign Up Successful")
                 if (!socketInstance.connected)
                 {
                     socketInstance.connect();
                     authenticateSocket(res.data.user.id,res.data.user.name);
                 }
-                setAuth(true)
-                navigate("/")
             }
             else 
                 toast.error("Signup Unsuccessful")

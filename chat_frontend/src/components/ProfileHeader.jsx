@@ -18,6 +18,7 @@ const ProfileHeader = (props) => {
                 toast.success("Logged out successfully")
                 socketInstance.disconnect()
                 props.setAuth(false)
+                props.setCurrentUserId(null)
                 navigate('/')       
             }    
         }

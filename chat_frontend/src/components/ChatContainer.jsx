@@ -145,9 +145,9 @@ const ChatContainer = ({currentUserId,chat_information,setChatSelected,setReadRe
         sendMessage()
     }
 
-
     const sendMessage = async () =>
     {
+        console.log('SendMessage:\n User Id: ',currentUserId,' \nType:',typeof currentUserId)
         // optimistic message to remove frontend latency and improve responsiveness
         // we will make a temporary id and then replace remove the message with that id once the db side response comes
 
@@ -174,12 +174,19 @@ const ChatContainer = ({currentUserId,chat_information,setChatSelected,setReadRe
         setMessages(prev => [...prev,optimisticMessage])
         setCurrentMessage("")
 
+        // console logs for debugging
+        console.log("chat_information:", chat_information)
+        console.log("currentUserId type+value:", typeof currentUserId, currentUserId)
+
         try{
             let res;
             if (chat_information[2])
                 res = await axiosInstance.post(`/send/group-chat/${chat_information[0]}`,{message:messageText,userId:currentUserId})
             else
                 res = await axiosInstance.post(`/send/chat/${chat_information[3]}`,{message:messageText,userId:currentUserId})
+
+            console.log("new_message from server:", res.data.new_message)
+            console.log('SendMessage:\n User Id: ',res.data.new_message.sender_id,' \nType:',typeof res.data.new_message.sender_id)
             
             // replacing the optimistic message with the message in the db response
             setMessages(prev =>
@@ -189,6 +196,9 @@ const ChatContainer = ({currentUserId,chat_information,setChatSelected,setReadRe
                     : msg
                 )
             );
+            if (!chat_information[0] && res.data.new_message?.conversation_id)
+                setChatSelected([res.data.new_message.conversation_id, chat_information[1], false, chat_information[3]])
+
         }
         catch(error) {
             // error
@@ -223,7 +233,7 @@ const ChatContainer = ({currentUserId,chat_information,setChatSelected,setReadRe
                 { (messages.length != 0) ? 
                     (messages.map(
                         (message) => 
-                            <MessageBubble key={message.message_id} message={message.message} sent_at={message.sent_at} status={message.status} mine={(message.sender_id == currentUserId)? true:false}/>
+                            <MessageBubble key={message.message_id} message={message.message} sent_at={message.sent_at} status={message.status} mine={(Number(message.sender_id) === Number(currentUserId))? true:false}/>
                         )
                     ) 
                     : 

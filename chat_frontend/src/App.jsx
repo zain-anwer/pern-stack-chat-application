@@ -27,7 +27,7 @@ function App() {
       try{
         const res = await axiosInstance.get("/auth/check")
         console.log("auth check:", res.data, "userId field:", res.data.userId)
-         if (res.data.userId)
+        if (res.data.userId)
         {
           authenticate(true)
           setCurrentUserId(res.data.userId)
@@ -66,10 +66,12 @@ function App() {
   // placing the loading animated here so that it rerenders
   // return a loading icon preferably
 
+  // loading until the authentication has been carried out and current user id has been set
+
   if (userAuthenticated === null)
     return(
     <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}>
-      <LoaderPinwheel className="animate-spin" size={40}/>
+        <LoaderPinwheel className="animate-spin" size={40}/>
     </div>)
 
 
@@ -80,9 +82,9 @@ function App() {
       <Toaster/>
       <div className="main-layout">
         <Routes>
-          <Route path="/" element= {userAuthenticated? <HomePage setAuth={authenticate} currentUserId = {currentUserId} onlineUsers={onlineUsers} /> : <LoginPage setAuth={authenticate}/>} />
-          <Route path="/SignUpPage" element={<SignUpPage setAuth={authenticate}/>} />
-          <Route path="/LoginPage" element={<LoginPage setAuth={authenticate}/>} />
+          <Route path="/" element= {userAuthenticated? <HomePage setAuth={authenticate} currentUserId = {currentUserId} setCurrentUserId={setCurrentUserId} onlineUsers={onlineUsers} /> : <LoginPage setAuth={authenticate} setCurrentUserId={setCurrentUserId}/>} />
+          <Route path="/SignUpPage" element={<SignUpPage setAuth={authenticate} setCurrentUserId={setCurrentUserId}/>} />
+          <Route path="/LoginPage" element={<LoginPage setAuth={authenticate} setCurrentUserId={setCurrentUserId}/>} />
         </Routes>
       </div>
     </>

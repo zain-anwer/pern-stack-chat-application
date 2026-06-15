@@ -9,7 +9,7 @@ import {toast} from 'react-hot-toast'
 import './HomePage.css' 
 
 
-const HomePage = ({currentUserId,setAuth,onlineUsers})=> {
+const HomePage = ({currentUserId,setCurrentUserId,setAuth,onlineUsers})=> {
 
    const [readRefreshes,setReadRefreshes] = useState(0)
    const [profile,setProfile] = useState({name:"",email:"",password:""})
@@ -40,7 +40,7 @@ const HomePage = ({currentUserId,setAuth,onlineUsers})=> {
       <div className="container">
          <div className="left-area">
             <div className="profileInfo-area">
-               <ProfileHeader profile={profile} setAuth={setAuth}/>
+               <ProfileHeader profile={profile} setAuth={setAuth} setCurrentUserId={setCurrentUserId}/>
             </div>
             <div className="active-tab-area">
                <button 
