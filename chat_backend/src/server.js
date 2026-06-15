@@ -35,6 +35,7 @@ console.log("DB RAW:", JSON.stringify(process.env.DB_URI || process.env.DATABASE
 
 // middleware
 
+app.use(express.static('public'))
 app.use(express.json());
 app.use(cookieParser());
 
