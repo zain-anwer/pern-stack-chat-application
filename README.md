@@ -1,6 +1,4 @@
-
 # Bubble Chat
-
 A real-time PERN stack chat application built as a rite of passage on my backend development journey.
 
 🔗 **Live Demo:** [bubble-pern-chat-app.vercel.app](https://bubble-pern-chat-app.vercel.app)
@@ -29,7 +27,25 @@ A real-time PERN stack chat application built as a rite of passage on my backend
 | Real-time | Socket.IO |
 | Database | PostgreSQL (Supabase) |
 | Auth | JWT + bcrypt |
-| Deployment | Vercel (frontend), Leapcell (backend) |
+| Deployment | Vercel (frontend), HuggingFace Spaces (backend) |
+
+---
+
+## Load Testing
+
+The backend was load tested using [Loader.io](https://loader.io) against the `/api/auth/check` endpoint — a protected route that runs JWT verification and a PostgreSQL user lookup on every request.
+
+**Test configuration:** 250 clients/sec over 1 minute (Clients per second mode)
+
+| Metric | Result |
+|---|---|
+| Avg. response time | 8281 ms |
+| Min / Max | 2650 ms / 9361 ms |
+| Successful requests | 3145 |
+| Error rate | 0% |
+| Timeouts | 0 |
+
+The server handled all requests without errors or timeouts. The high response times are a known constraint of the HuggingFace Spaces free tier — limited CPU means requests queue under sustained load. The application code and database hold up fine; the bottleneck is purely infrastructure. Moving to a dedicated hosting tier (Railway, Render, etc.) would bring response times well under 200ms at equivalent load.
 
 ---
 
@@ -40,21 +56,18 @@ A real-time PERN stack chat application built as a rite of passage on my backend
 - PostgreSQL database (or a Supabase project)
 
 ### 1. Clone the repository
-
 ```bash
 git clone https://github.com/zain-anwer/pern-stack-chat-application.git
 cd pern-stack-chat-application
 ```
 
 ### 2. Set up the backend
-
 ```bash
 cd chat_backend
 npm install
 ```
 
 Create a `.env` file in `chat_backend/`:
-
 ```dotenv
 PORT=3000
 NODE_ENV=development
@@ -67,7 +80,6 @@ CLIENT_URL=http://localhost:5173
 **Set up the database:**
 
 Schema:
-
 <img width="1001" height="410" alt="supabase-schema-khawfekxfinuktyrcoiy" src="https://github.com/user-attachments/assets/e7b57463-174d-41ae-956d-6690b59d3e8f" />
 
 The entire schema — tables, triggers, indexes, and constraints — is defined in `chat_backend/db/init.sql`. Simply copy and paste its contents into your PostgreSQL command line or any SQL editor (pgAdmin, DBeaver, Supabase SQL editor, etc.) and run it. That's all you need to get the database ready.
@@ -79,14 +91,12 @@ npm run dev
 ### 3. Set up the frontend
 
 Open a new terminal:
-
 ```bash
 cd chat_frontend
 npm install
 ```
 
 Create a `.env` file in `chat_frontend/`:
-
 ```dotenv
 VITE_BACKEND_URL=http://localhost:3000/api
 ```
@@ -103,7 +113,7 @@ The app will be running at `http://localhost:5173`.
 
 I built this project largely from scratch as a way to solidify my understanding of full-stack development — in particular the parts that tutorials tend to gloss over: race conditions between database triggers and socket events, cookie behavior across different hosting environments, WebSocket limitations on serverless platforms, and managing real-time state across multiple connected clients.
 
-It was genuinely tricky. Debugging socket authentication across a split deployment (Vercel frontend, serverless backend) taught me more about how browsers, cookies, and persistent connections actually work than any tutorial had.
+It was genuinely tricky. Debugging socket authentication across a split deployment (Vercel frontend, HuggingFace Spaces backend) taught me more about how browsers, cookies, and persistent connections actually work than any tutorial had.
 
 Speaking of which — a significant part of my foundational web development knowledge came from the **[Full Stack Open](https://fullstackopen.com/)** course by the University of Helsinki. It's free, rigorous, and I'd recommend it to anyone serious about web development.
 
