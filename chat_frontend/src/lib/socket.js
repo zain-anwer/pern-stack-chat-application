@@ -6,9 +6,11 @@ const BASE_URL = import.meta.env.VITE_BACKEND_URL.replace('/api','')
 export const socketInstance = io(
     BASE_URL,
     {
-        withCredentials:true, 
         autoConnect: false,
-        transports: ['websocket','polling']
+        transports: ['websocket','polling'],
+        auth: {
+            token: localStorage.getItem('token')
+        }
     }
 )
 

@@ -41,7 +41,7 @@ export const signup = async (req,res) =>
             // Function that generates token and sends it as a cookie through the res object
 
             const id = result.rows[0].user_id;
-            const token = generateToken(result.rows[0].user_id,res);
+            const token = generateToken(result.rows[0].user_id);
 
             return res.status(200).json({
                 "success": true,
@@ -88,7 +88,7 @@ export const login = async (req,res) =>
 
             const id = result.rows[0].user_id;
             const fullname = result.rows[0].name;
-            const token = generateToken(result.rows[0].user_id,res);
+            const token = generateToken(result.rows[0].user_id);
 
             return res.status(200).json({
                 "success": true,
@@ -110,11 +110,15 @@ export const login = async (req,res) =>
 
 export const logout = async (_,res) => 
     {
+        // token stored in local storage on the frontend will simply be deleted on the frontend
+        // no clue if this will work but hope so :)
+        /*
         res.clearCookie("jwt", {
         httpOnly: true,
         sameSite: process.env.NODE_ENV === "development" ? "strict" : "none",
         secure: process.env.NODE_ENV === "development" ? false : true,
          });
+        */
         return res.status(200).json({message: "Logged out successfully"});   
     };
 

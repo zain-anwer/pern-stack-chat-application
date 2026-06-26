@@ -15,6 +15,7 @@ const ProfileHeader = (props) => {
             const res = await axiosInstance.post("/auth/logout")
             if (res.status == 200)
             {
+                localStorage.removeItem('token')
                 toast.success("Logged out successfully")
                 socketInstance.disconnect()
                 props.setAuth(false)

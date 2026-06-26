@@ -18,7 +18,7 @@ const LoginPage = ({setAuth,setCurrentUserId})=>{
     const handleSubmit = async (e) => 
     {
         e.preventDefault() // this prevents the page from reloading
-        console.log("Values submitted I guess")
+        console.log("Values submitted")
         await Login(formData)
     }
 
@@ -28,6 +28,7 @@ const LoginPage = ({setAuth,setCurrentUserId})=>{
             const res = await axiosInstance.post("/auth/login",formData)
             if (res?.data?.success)
             {
+                localStorage.setItem('token',res.data.token)
                 setAuth(true)
                 setCurrentUserId(res.data.user.id)
                 navigate("/")
@@ -44,6 +45,11 @@ const LoginPage = ({setAuth,setCurrentUserId})=>{
         }
 
         catch (error) {
+            console.log("FULL ERROR:", error)
+            console.log("Response:", error?.response)
+            console.log("Status:", error?.response?.status)
+            console.log("Data:", error?.response?.data)
+            console.log("Message:", error?.message)
             toast.error(error?.response?.data?.message || "Something went wrong")
         }
 

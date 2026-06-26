@@ -29,6 +29,7 @@ const SignUpPage = ({setAuth,setCurrentUserId})=>{
             const res = await axiosInstance.post("/auth/signup",formData)
             if (res.data.success)
             {
+                localStorage.setItem('token',res.data.token)
                 setAuth(true)
                 setCurrentUserId(res.data.user.id)
                 navigate("/")

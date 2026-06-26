@@ -4,6 +4,7 @@ import dotenv from 'dotenv'
 import http from 'http'
 import { pool } from './db.js'
 import { Server } from 'socket.io'
+import socketAuthMiddleware from '../middleware/socket.auth.middleware.js'
 
 dotenv.config()
 
@@ -35,6 +36,8 @@ const io = new Server(server,{
         credentials: true // allows cookies
     }
 })
+
+// io.use(socketAuthMiddleware)
 
 // takes the name of the event and the callback function
 

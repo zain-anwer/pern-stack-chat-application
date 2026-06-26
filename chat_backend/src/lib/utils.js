@@ -3,10 +3,14 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-export const generateToken = (userId,res) =>
+export const generateToken = (userId) =>
 {
     const token = jwt.sign({userId},process.env.JWT_SECRET,{expiresIn : "7d"});
-      
+    
+    // removing cookie based token transfer because of some bullshit hf proxy settings or sm :(
+    // if you ever for some god forsaken reason need to do it again change the function signature as well idiot
+
+    /*
     res.cookie("jwt",token,
         {
             maxAge: 7 * 24 * 60 * 60 * 1000,
@@ -15,6 +19,7 @@ export const generateToken = (userId,res) =>
             secure: (process.env.NODE_ENV === "development") ? false : true        
         }
     );
+    */
 
     return token;
 };

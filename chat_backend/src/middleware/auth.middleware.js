@@ -13,9 +13,12 @@ export const protectRoute = async (req,res,next) =>
         // const token = req.cookies.jwt;
         let token;
 
+        // check in the authorization header in the request object
         if (req.headers.authorization && req.headers.authorization.startsWith("Bearer")) {
             token = req.headers.authorization.split(" ")[1];
         } 
+
+        // otherwise check whether a cookie named jwt exists
         else if (req.cookies.jwt) {
             token = req.cookies.jwt;
         }
