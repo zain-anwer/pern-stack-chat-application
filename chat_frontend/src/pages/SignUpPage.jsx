@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { User, Lock, Mail } from "lucide-react"
 import { axiosInstance } from "../lib/axios"
-import { authenticateSocket,socketInstance } from "../lib/socket"
+import { connectSocket } from "../lib/socket"
 import { Link,useNavigate } from "react-router-dom"
 import "./AuthPage.css"
 import { toast } from "react-hot-toast"
@@ -34,11 +34,7 @@ const SignUpPage = ({setAuth,setCurrentUserId})=>{
                 setCurrentUserId(res.data.user.id)
                 navigate("/")
                 toast.success("Sign Up Successful")
-                if (!socketInstance.connected)
-                {
-                    socketInstance.connect();
-                    authenticateSocket(res.data.user.id,res.data.user.name);
-                }
+                connectSocket(true)
             }
             else 
                 toast.error("Signup Unsuccessful")
@@ -52,7 +48,7 @@ const SignUpPage = ({setAuth,setCurrentUserId})=>{
 
     return(
         <>
-            <div className="container">
+            <div className="auth-page">
                 
                 <div className="form-area">
                     

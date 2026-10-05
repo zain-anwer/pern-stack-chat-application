@@ -1,38 +1,51 @@
-*{
+.auth-page {
     box-sizing: border-box;
     color: rgb(241, 241, 241);
+    display: flex;
+    justify-content: center;
+    align-items: stretch;
+    gap: 0;
+    min-height: 100vh;
+    padding: 3vh 4vw;
 }
 
-label {
+.auth-page *,
+.auth-page *::before,
+.auth-page *::after {
+    box-sizing: border-box;
+}
+
+.auth-page label {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
+    width: 69.3%;
 }
 
-form {
+.auth-page form {
     display: flex;
     align-items: center;
     flex-direction: column;
-    gap:1.5rem;
+    gap: 1.5rem;
+    width: 100%;
 }
 
-.input-group {
+.auth-page .input-group {
     position: relative;
     width: 100%;
 }
 
-.input-group svg {
+.auth-page .input-group svg {
     position: absolute;
     left: 10px;
     top: 50%;
     transform: translateY(-50%);
-    color: rgb(241,241,241);
+    color: rgb(241, 241, 241);
 }
 
-.input-group input {
-    padding-left: 12.5%;
+.auth-page .input-group input {
+    padding-left: 14.5%;
     width: 100%;
-    min-width: 25vw;
     min-height: 6vh;
     border-style: solid;
     border-width: 2px;
@@ -43,34 +56,21 @@ form {
     font-size: medium;
 }
 
-input:focus {
+.auth-page input:focus {
     outline: none;
-    border-color: none;
 }
 
-.container{
-
-    margin-top: 5vh;
-    margin-bottom: 0vh;
-    justify-content: center;
-    align-items: center stretch;
-    display:flex;
-    padding: 0px;
-    min-height: 100vh;
-}
-
-
-.form-area{
+.auth-page .form-area {
     display: flex;
     gap: 0.5rem;
     flex-direction: column;
     align-items: center;
     min-height: 80vh;
-    min-width: 40vw;
+    min-width: 0;
+    width: 45vw;
     max-width: 45vw;
-    max-height: 90vh;
     padding: 2%;
-    background-color: rgb(255,255,255,0.2);
+    background-color: rgba(255, 255, 255, 0.2);
     backdrop-filter: blur(10px);
     border-style: none;
     border-top-left-radius: 5%;
@@ -79,27 +79,27 @@ input:focus {
     border-bottom-right-radius: 0%;
 }
 
-.picture-area {
+.auth-page .picture-area {
     min-height: 80vh;
-    min-width: 40vw;
+    min-width: 0;
+    width: 45vw;
     max-width: 45vw;
-    max-height: 85vh;
-    padding: 0; 
+    padding: 0;
     background-color: orange;
     border-top-right-radius: 5%;
     border-bottom-right-radius: 5%;
-    overflow: hidden; 
+    overflow: hidden;
     display: flex;
 }
 
-.picture-area img {
+.auth-page .picture-area img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     display: block;
 }
 
-.submit-button {
+.auth-page .submit-button {
     border: none;
     border-radius: 5%;
     background-color: rgb(102, 102, 212);
@@ -108,11 +108,33 @@ input:focus {
     min-width: 15vw;
 }
 
-.submit-button:hover {
+.auth-page .submit-button:hover {
     background-color: rgb(133, 133, 196);
 }
 
-.submit-button:focus{
+.auth-page .submit-button:focus{
     border: none;
     outline: none;
+}
+
+@media (max-width: 640px) {
+    .auth-page {
+        flex-direction: column;
+        padding: 16px;
+    }
+
+    .auth-page .form-area {
+        width: 100%;
+        max-width: none;
+        min-height: 0;
+    }
+
+    .auth-page .form-area {
+        border-radius: 5%;
+        padding: 20px;
+    }
+
+    .auth-page .picture-area {
+        display: none;
+    }
 }

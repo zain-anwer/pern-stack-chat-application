@@ -1,69 +1,77 @@
-*{
+.home-page,
+.home-page * {
     box-sizing: border-box;
-    padding: 0;
-    margin: 0;
 }
 
-.container{
-    display:flex;
+.home-page {
+    display: flex;
     flex-direction: row;
     min-height: 100vh;
+    width: 90%;
+    margin-inline: auto;
     gap: 0;
+    align-items: center;
 }
 
-.left-area{
+.left-area {
     display: flex;
     flex-direction: column;
     border-style: solid;
     border-width: 2px 0px 2px 2px;
     border-color: rgb(105, 100, 100);
-    width:25%;
-    padding: 1%;
+    flex: 0 0 27.7778%;
+    min-width: 0;
+    padding: 12px;
     height: 95vh;
     border-radius: 2% 0% 0% 2%;
 }
 
-.right-area{
+.right-area {
     display: flex;
     flex-direction: column;
-    background-color: rgb(255,255,255,0.2);
+    background-color: rgba(255, 255, 255, 0.2);
     backdrop-filter: blur(10px);
     border-style: solid;
     border-width: 2px;
     border-color: rgb(105, 100, 100);
-    padding: 2%;
+    padding: 16px;
     height: 95vh;
-    width:65%;
+    flex: 1 1 0;
+    min-width: 0;
     border-radius: 0% 1% 1% 0%;
 }
 
-.profileInfo-area{
-    height: 10%;
+.profileInfo-area {
+    flex: 0 0 auto;
     width: 100%;
     display: flex;
     align-items: center;
-    margin-top: 5%;
-    padding: 2%;
-    padding-left: 10%;
+    min-width: 0;
+    padding: 8px;
     border-radius: 20px;
     background-color: rgba(245, 238, 238, 0.2);
     backdrop-filter: blur(10px);
 }
 
-.chatlist-area{
-    height: 90%;
-    padding: 0%;
-    padding-top: 10%;
+.chatlist-area {
+    flex: 1 1 auto;
+    min-height: 0;
+    padding-top: 12px;
     overflow-y: auto;
+    scrollbar-color: auto transparent;
+}
+
+.chatlist-area::-webkit-scrollbar-track {
+    background: transparent;
 }
 
 .active-tab-area {
-    margin-top: 5%;
+    flex: 0 0 auto;
+    margin-top: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
     width: 100%;
-    /* Create a pill-shaped background for both buttons */
     background-color: rgba(245, 238, 238, 0.1);
     padding: 5px;
     border-radius: 12px;
@@ -72,7 +80,7 @@
 
 .contacts-button,
 .chats-button {
-    flex: 1; /* Makes both buttons equal width */
+    flex: 1;
     padding: 10px;
     border: none;
     border-radius: 8px;
@@ -80,19 +88,46 @@
     font-family: 'Inter', sans-serif;
     font-weight: 500;
     color: #fff;
-    background-color: transparent; /* Default state is transparent */
+    background-color: transparent;
     transition: all 0.2s ease-in-out;
 }
 
-/* Hover effect for inactive tabs */
 .contacts-button:hover,
 .chats-button:hover {
     background-color: rgba(255, 255, 255, 0.05);
 }
 
-/* The "Active" state styles */
 .contacts-button.active,
 .chats-button.active {
-    background-color: rgb(75, 77, 216); /* Your original blue */
+    background-color: rgb(75, 77, 216);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+@media (max-width: 640px) {
+    .home-page {
+        width: 100%;
+        min-height: 100vh;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+        padding: 12px;
+    }
+
+    .left-area,
+    .right-area {
+        flex: 0 0 auto;
+        width: 100%;
+        height: auto;
+        border: 2px solid rgb(105, 100, 100);
+        border-radius: 12px;
+    }
+
+    .left-area {
+        min-height: 220px;
+        max-height: 36vh;
+    }
+
+    .right-area {
+        min-height: 55vh;
+    }
 }

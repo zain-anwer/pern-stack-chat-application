@@ -1,4 +1,4 @@
-import { LogOut,CircleUserRound,UserPen } from 'lucide-react'
+import { LogOut,UserPen } from 'lucide-react'
 import { axiosInstance } from '../lib/axios'
 import { socketInstance } from '../lib/socket'
 import { toast } from 'react-hot-toast'
@@ -33,8 +33,8 @@ const ProfileHeader = (props) => {
     return (
         <div className="profile-info-area">
             <div className="name-area">
-                <CircleUserRound size={35} style={{marginRight:"5%"}}/>
-                <h3 style={{fontFamily:"Inter", width:"100%",whiteSpace: "nowrap", overflow:"hidden", textOverflow:"ellipsis"}} >{props.profile.name}</h3>
+                <img className="profile-avatar" src="/images/default_dp.png" alt="" />
+                <h3 style={{fontFamily:"Inter"}}>{props.profile.name}</h3>
             </div>
             <div className="button-area">
                 <button className="logout-button" onClick={logout}>

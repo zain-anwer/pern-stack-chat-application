@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Bot, MessageCircleOff } from 'lucide-react'
 import { axiosInstance } from "../lib/axios"
 import { toast } from 'react-hot-toast'
 import { socketInstance } from '../lib/socket'
@@ -26,7 +27,7 @@ const ChatList = ({setReadRefreshes,readRefreshes,setChatSelected}) =>
             socketInstance.off("getMessage",handler)
         }
 
-    },[])
+    },[setReadRefreshes])
     
     
     const selectChat = (conversation_id,display_name,is_group,other_user_id) =>
@@ -36,28 +37,36 @@ const ChatList = ({setReadRefreshes,readRefreshes,setChatSelected}) =>
     }
     
     useEffect(()=>{
+        let cancelled = false
         const getChatList = async () => {
             try {
                 const res = await axiosInstance("/chats")
-                setChatList(res.data.chats)
-                console.log(res.data.chats)
+                if (!cancelled) {
+                    setChatList(res.data.chats)
+                }
             }
             catch(error)
             {
-                toast.error(error.response.data.message || "Error loading chats")
+                if (!cancelled) {
+                    toast.error(error.response?.data?.message || "Error loading chats")
+                }
             }
         }
         getChatList()
+
+        return () => {
+            cancelled = true
+        }
     },[readRefreshes])
 
     return (
-        <div className="chats" style={{display: 'flex', flexDirection:'column', gap:0, alignItems:'center', justifyContent:'center'}}>
+        <div className={`chats ${chatList === null || chatList.length === 0 ? 'has-placeholder' : ''}`}>
             { 
                 (chatList === null) ? 
-                    <p>Loading Chats</p>
+                    <p className="chat-list-placeholder">Loading Chats... <Bot size={20} aria-hidden="true" /></p>
                 :
                 (chatList.length == 0) ? 
-                    <p>No chats yet</p>
+                    <p className="chat-list-placeholder">No Chats Yet <MessageCircleOff size={20} aria-hidden="true" /></p>
                 :
                     (
                         // make a chat tile pleasee

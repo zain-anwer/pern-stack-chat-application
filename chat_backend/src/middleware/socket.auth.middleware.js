@@ -30,6 +30,9 @@ const socketAuthMiddleware = async (socket,next) =>
         socket.userId = decoded.userId
 
         const result = await pool.query("SELECT * FROM Users where user_id = $1",[decoded.userId])
+        if (result.rows.length === 0) {
+            return next(new Error("Unauthorized - User Not Found"))
+        }
         socket.user = result.rows[0]
 
         next()

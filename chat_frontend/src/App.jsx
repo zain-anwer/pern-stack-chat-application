@@ -1,6 +1,6 @@
 import {Routes, Route} from 'react-router-dom'
 import { axiosInstance } from './lib/axios'
-import { socketInstance } from './lib/socket'
+import { connectSocket, socketInstance } from './lib/socket'
 import { useEffect, useState } from 'react'
 import SignUpPage from './pages/SignUpPage'
 import LoginPage from './pages/LoginPage'
@@ -27,13 +27,13 @@ function App() {
       try{
         const res = await axiosInstance.get("/auth/check")
         console.log("auth check:", res.data, "userId field:", res.data.userId)
-        if (res.data.userId)
-        {
-          authenticate(true)
-          setCurrentUserId(res.data.userId)
+        if (!res.data.userId) {
+          authenticate(false)
+          return
         }
-        // to reconnect socket on re-renders
-        if (!socketInstance.connected) socketInstance.connect();
+        authenticate(true)
+        setCurrentUserId(res.data.userId)
+        connectSocket()
       }
      
       catch{ 
@@ -51,8 +51,6 @@ function App() {
         console.log(userIds)
         setOnlineUsers(userIds)
       }
-
-      socketInstance.off("getOnlineUsers")
 
       socketInstance.on("getOnlineUsers",handleOnlineUsers)
 

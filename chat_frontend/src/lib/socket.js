@@ -8,21 +8,15 @@ export const socketInstance = io(
     {
         autoConnect: false,
         transports: ['websocket','polling'],
-        auth: {
-            token: localStorage.getItem('token')
-        }
+        auth: (callback) => callback({ token: localStorage.getItem('token') })
     }
 )
 
-// will call this immediately after connecting to sent the userId
-// cookies are httpOnly so apparently frontend cannot read it
-
-export const authenticateSocket = (userId, userName) => {
-    if (socketInstance.connected) {
-        socketInstance.emit("authenticate", { userId, userName })
-    } else {
-        socketInstance.once("connect", () => {
-            socketInstance.emit("authenticate", { userId, userName })
-        })
+export const connectSocket = (refreshCredentials = false) => {
+    if (refreshCredentials && socketInstance.connected) {
+        socketInstance.disconnect()
+    }
+    if (!socketInstance.connected) {
+        socketInstance.connect()
     }
 }

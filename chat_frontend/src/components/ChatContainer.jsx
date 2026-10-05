@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useLayoutEffect, useRef, useCallback, useMemo } from 'react'
 import MessageBubble from './MessageBubble.jsx'
-import { SendHorizonal } from 'lucide-react'
+import { MessageSquareOff, SendHorizonal } from 'lucide-react'
 import { axiosInstance } from '../lib/axios.js'
 import { socketInstance } from '../lib/socket.js'
 import { toast } from 'react-hot-toast'
@@ -8,49 +8,97 @@ import './ChatContainer.css'
 
 /* chat_information = [conversation_id,display_name,is_group,other_user_id] */
 
+const statusPriority = { sending: 0, sent: 1, delivered: 2, read: 3 }
+
+const latestStatus = (first, second) =>
+    (statusPriority[second] ?? 0) > (statusPriority[first] ?? 0) ? second : first
+
+const mergeMessages = (current, incoming, knownStatuses) => {
+    const merged = new Map()
+
+    for (const message of [...current, ...incoming]) {
+        const key = String(message.message_id)
+        const previous = merged.get(key)
+        const cachedStatus = knownStatuses.get(key)
+        const incomingStatus = message.status ?? 'sent'
+        const status = latestStatus(
+            latestStatus(previous?.status ?? incomingStatus, incomingStatus),
+            cachedStatus ?? incomingStatus
+        )
+        merged.set(key, { ...previous, ...message, status })
+    }
+
+    return [...merged.values()].sort(
+        (first, second) => new Date(first.sent_at) - new Date(second.sent_at)
+    )
+}
+
 const ChatContainer = ({currentUserId,chat_information,setChatSelected,setReadRefreshes,onlineUsers}) =>
 {
     const scrollRef = useRef(null)
-    const [messages,setMessages] = useState([])
+    const knownStatuses = useRef(new Map())
+    const temporaryMessageSequence = useRef(0)
     const [currentMessage,setCurrentMessage] = useState("")
+    const chatKey = chat_information[2]
+        ? `conversation:${chat_information[0]}`
+        : `contact:${chat_information[3]}`
+    const activeChatKey = useRef(chatKey)
+    useLayoutEffect(() => {
+        activeChatKey.current = chatKey
+    },[chatKey])
+    const [messageState,setMessageState] = useState(() => ({ chatKey, messages: [] }))
+    const messages = useMemo(
+        () => messageState.chatKey === chatKey ? messageState.messages : [],
+        [messageState, chatKey]
+    )
+    const setMessages = useCallback(update => {
+        setMessageState(previous => {
+            if (activeChatKey.current !== chatKey) return previous
+            const current = previous.chatKey === chatKey ? previous.messages : []
+            const next = typeof update === 'function' ? update(current) : update
+            return { chatKey, messages: next }
+        })
+    },[chatKey])
 
-    /* UseEffect for socket ~_~ */
+    const updateMessageStatus = useCallback((messageId, status) => {
+        const key = String(messageId)
+        const nextStatus = latestStatus(knownStatuses.current.get(key), status)
+        knownStatuses.current.set(key, nextStatus)
+        setMessages(prev => prev.map(message =>
+            String(message.message_id) === key
+                ? { ...message, status: latestStatus(message.status, nextStatus) }
+                : message
+        ))
+    },[setMessages])
 
-    useEffect(()=>
-    {   
-        const readSingleMessageHandler = ({message_id,readBy,status}) =>
-        {
-            if (readBy != chat_information[3])
-                return;
-            console.log("Updating message status to 'read' for message with id: ",message_id)
-            setTimeout(() => {
-                setMessages(prev => prev.map((message) => 
-                    (message.message_id == parseInt(message_id)) ? {...message,status} : message
-                ))
-            },1000)
+    useEffect(() => {
+        const isCurrentConversation = conversationId =>
+            !conversationId ||
+            !chat_information[0] ||
+            String(conversationId) === String(chat_information[0])
+
+        const deliveryHandler = ({message_id,conversation_id,status}) => {
+            if (isCurrentConversation(conversation_id)) {
+                updateMessageStatus(message_id, status)
+            }
         }
 
-        const handler = ({message_id,status}) => 
-        {
-            // waiting 500ms to make the post query finish
-            // this will prevent send_message "optimistic sent" overwriting the status 
-
-            setTimeout(() => {
-                setMessages(prev => 
-                    prev.map((message) => (message.message_id == message_id && message.status != 'read') ? {...message,status} : message
-                ))
-            },500)
+        const readHandler = ({message_id,conversation_id,readBy,status}) => {
+            if (
+                isCurrentConversation(conversation_id) &&
+                (chat_information[2] || String(readBy) === String(chat_information[3]))
+            ) {
+                updateMessageStatus(message_id, status)
+            }
         }
 
-        socketInstance.on("messageDelivered",handler)
-        socketInstance.on("readSingleMessage",readSingleMessageHandler)
-
+        socketInstance.on("messageDelivered",deliveryHandler)
+        socketInstance.on("readSingleMessage",readHandler)
         return () => {
-            socketInstance.off("messageDelivered",handler)
-            socketInstance.off("readSingleMessage",readSingleMessageHandler)
+            socketInstance.off("messageDelivered",deliveryHandler)
+            socketInstance.off("readSingleMessage",readHandler)
         }
-
-    },[chat_information])
+    },[chat_information, updateMessageStatus])
 
     useEffect(()=>
     {
@@ -59,86 +107,75 @@ const ChatContainer = ({currentUserId,chat_information,setChatSelected,setReadRe
         }
     },[messages])
 
-    useEffect(()=>
-    {
-        if (!chat_information) return;
+    useEffect(() => {
+        let cancelled = false
 
-        const readMessageshandler = ({conversation_id,readBy}) => {
-            if (chat_information[0] && chat_information[0] == conversation_id && readBy == chat_information[3])
-                setTimeout(()=>{
-                    setMessages(prev => 
-                        prev.map(msg => ({ ...msg, status: 'read' }))
-                    );
-                },500)
-        }
-
-        const handler = async (new_message) =>
-        {
-            if (new_message.sender_id == chat_information[3])
-                setMessages(prev => [...prev,new_message])
-            else 
-                return;
-            
-            try {
-                console.log("Message Id: ",new_message.message_id)
-                await axiosInstance.put(`/read-message/${new_message.message_id}`);
-            } 
-            catch (err) {
-                console.error("Error updating read status:", err.response?.status, err.response?.data);
+        const readMessagesHandler = ({conversation_id,readBy,message_statuses = []}) => {
+            if (
+                String(conversation_id) === String(chat_information[0]) &&
+                (chat_information[2] || String(readBy) === String(chat_information[3]))
+            ) {
+                message_statuses.forEach(({message_id,status}) =>
+                    updateMessageStatus(message_id, status)
+                )
             }
-            setReadRefreshes(prev => prev + 1)
-            const status = 'read'
-            setMessages(prev => 
-                prev.map((message) => (message.message_id == new_message.message_id) ? {...message,status} : message
-            ))
         }
 
-        /* this is supposed to be an async listener I guess */
-        socketInstance.on("getMessage",handler)
-        socketInstance.on("readMessages",readMessageshandler)
+        const messageHandler = async newMessage => {
+            const belongsToOpenChat =
+                (chat_information[0] &&
+                    String(newMessage.conversation_id) === String(chat_information[0])) ||
+                (!chat_information[2] &&
+                    String(newMessage.sender_id) === String(chat_information[3]))
+            if (!belongsToOpenChat) return
 
-        const getMessages = async() =>
-        {
+            setMessages(prev => mergeMessages(prev, [newMessage], knownStatuses.current))
             try {
-
-                let res;
-                console.log("This is the get messages function with convo id: ",chat_information[0])
-                
-                if (chat_information[0])
-                    res = await axiosInstance.get(`/messages/${chat_information[0]}`)
-                else
-                {
-                    const find_convo_result = await axiosInstance.get(`/convo-id/${chat_information[3]}`)
-                    if (!find_convo_result.data.success)
-                    {
-                        setMessages([])
-                        return;
-                    }
-                    res = await axiosInstance.get(`/messages/${find_convo_result.data.conversation_id}`)
-                }
-                console.log(res)
-                
-                setMessages(res.data.messages)
+                await axiosInstance.put(`/read-message/${newMessage.message_id}`)
+                if (cancelled) return
+                updateMessageStatus(newMessage.message_id, 'read')
                 setReadRefreshes(prev => prev + 1)
-            }
-            catch(error) {
-                if (error.response && error.response.status === 404)
-                {
-                    toast.error("No conversation for this chat so far")
-                    setMessages([])
-                }
-                else
-                    toast.error(error.response.data.message || "Something Went Down/Wrong!")
+            } catch (error) {
+                console.error(
+                    "Error updating read status:",
+                    error.response?.status,
+                    error.response?.data
+                )
             }
         }
+
+        const getMessages = async () => {
+            try {
+                let conversationId = chat_information[0]
+                if (!conversationId) {
+                    const result = await axiosInstance.get(`/convo-id/${chat_information[3]}`)
+                    conversationId = result.data.conversation_id
+                }
+                const result = await axiosInstance.get(`/messages/${conversationId}`)
+                if (cancelled) return
+                setMessages(prev =>
+                    mergeMessages(prev, result.data.messages, knownStatuses.current)
+                )
+                setReadRefreshes(prev => prev + 1)
+            } catch (error) {
+                if (cancelled) return
+                if (error.response?.status === 404) {
+                    return
+                }
+                toast.error(error.response?.data?.message || "Something Went Down/Wrong!")
+            }
+        }
+
+        socketInstance.on("getMessage",messageHandler)
+        socketInstance.on("readMessages",readMessagesHandler)
         getMessages()
 
         return () => {
-            socketInstance.off("getMessage",handler)
-            socketInstance.off("readMessages",readMessageshandler)
+            cancelled = true
+            socketInstance.off("getMessage",messageHandler)
+            socketInstance.off("readMessages",readMessagesHandler)
         }
-    }
-    ,[chat_information])
+    },[chat_information, chatKey, currentUserId, setMessages, setReadRefreshes, updateMessageStatus])
 
     const handleSubmit = (e) => {
         e.preventDefault()
@@ -147,36 +184,26 @@ const ChatContainer = ({currentUserId,chat_information,setChatSelected,setReadRe
 
     const sendMessage = async () =>
     {
-        console.log('SendMessage:\n User Id: ',currentUserId,' \nType:',typeof currentUserId)
-        // optimistic message to remove frontend latency and improve responsiveness
-        // we will make a temporary id and then replace remove the message with that id once the db side response comes
-
         const messageText = currentMessage.trim()
         
-        // checking for empty messages
         if (messageText.length == 0)
         {
             toast("Please refrain from sending empty messages ಠ_ಠ")
             return
         }
         
-        // generating a temporary id
-        const tempId = Date.now()
+        const tempId = `temp-${Date.now()}-${temporaryMessageSequence.current++}`
 
         const optimisticMessage = {
-            'message_id': tempId,
-            'sender_id': currentUserId,
-            'message': messageText,
-            'sent_at': new Date().toISOString(),
-            'status': 'sending',
+            message_id: tempId,
+            sender_id: currentUserId,
+            message: messageText,
+            sent_at: new Date().toISOString(),
+            status: 'sending',
         }
         
         setMessages(prev => [...prev,optimisticMessage])
         setCurrentMessage("")
-
-        // console logs for debugging
-        console.log("chat_information:", chat_information)
-        console.log("currentUserId type+value:", typeof currentUserId, currentUserId)
 
         try{
             let res;
@@ -185,29 +212,37 @@ const ChatContainer = ({currentUserId,chat_information,setChatSelected,setReadRe
             else
                 res = await axiosInstance.post(`/send/chat/${chat_information[3]}`,{message:messageText,userId:currentUserId})
 
-            console.log("new_message from server:", res.data.new_message)
-            console.log('SendMessage:\n User Id: ',res.data.new_message.sender_id,' \nType:',typeof res.data.new_message.sender_id)
-            
-            // replacing the optimistic message with the message in the db response
-            setMessages(prev =>
-                prev.map(msg =>
-                    msg.message_id === tempId
-                    ? { ...res.data.new_message, status: "sent" }
-                    : msg
-                )
-            );
-            if (!chat_information[0] && res.data.new_message?.conversation_id)
-                setChatSelected([res.data.new_message.conversation_id, chat_information[1], false, chat_information[3]])
+            const newMessage = res.data.new_message
+            const messageKey = String(newMessage.message_id)
+            const status = latestStatus(
+                newMessage.status ?? 'sent',
+                knownStatuses.current.get(messageKey)
+            )
+            knownStatuses.current.set(messageKey, status)
+            setMessages(prev => mergeMessages(
+                prev.filter(msg => msg.message_id !== tempId),
+                [{ ...newMessage, status }],
+                knownStatuses.current
+            ))
+            setReadRefreshes(prev => prev + 1)
+
+            if (
+                !chat_information[0] &&
+                res.data.new_message?.conversation_id &&
+                activeChatKey.current === chatKey
+            ) {
+                setChatSelected([
+                    res.data.new_message.conversation_id,
+                    chat_information[1],
+                    false,
+                    chat_information[3]
+                ])
+            }
 
         }
         catch(error) {
-            // error
-            toast.error(error.response.data.message || "Failed to send message")
-            // removing optimistic message
-            setMessages(
-                prev => 
-                    prev.filter(msg => msg.message_id !== tempId)
-            )
+            toast.error(error.response?.data?.message || "Failed to send message")
+            setMessages(prev => prev.filter(msg => msg.message_id !== tempId))
         }
     }
 
@@ -216,7 +251,6 @@ const ChatContainer = ({currentUserId,chat_information,setChatSelected,setReadRe
         setChatSelected([])
     }
 
-    console.log("currentUserId:", currentUserId, "first message sender_id:", messages[0]?.sender_id)
     return (
         <> 
             <div className="opened-chat-info-area">
@@ -225,11 +259,11 @@ const ChatContainer = ({currentUserId,chat_information,setChatSelected,setReadRe
                 </div>
                 <div className="name-status-area">
                     <h3 style={{fontFamily:'Inter'}}>{chat_information[1]}</h3>
-                    {(onlineUsers.includes(chat_information[3])? <sub style={{fontFamily: 'Roboto'}}>Online</sub> : <sub style={{fontFamily: 'Roboto'}}>Offline</sub>)}
+                    {(onlineUsers.some(userId => String(userId) === String(chat_information[3]))? <sub style={{fontFamily: 'Roboto'}}>Online</sub> : <sub style={{fontFamily: 'Roboto'}}>Offline</sub>)}
                 </div>
                 <button onClick={()=>{closeChat()}} className="close-chat-button">close chat</button>
             </div>
-            <div className="messages-area">
+            <div className={`messages-area ${messages.length === 0 ? 'is-empty' : ''}`}>
                 { (messages.length != 0) ? 
                     (messages.map(
                         (message) => 
@@ -237,7 +271,7 @@ const ChatContainer = ({currentUserId,chat_information,setChatSelected,setReadRe
                         )
                     ) 
                     : 
-                    (<p>No messages yet</p>)
+                    (<p className="messages-placeholder">No messages yet <MessageSquareOff size={20} aria-hidden="true" /></p>)
                 }
                 <div ref={scrollRef}/>
             </div>

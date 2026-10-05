@@ -13,11 +13,14 @@
     padding: 2%;
     margin: 2%;
     border-radius: 10px;
-    background-color: rgb(74, 165, 165);
+    color: black;
+    background-color: rgb(200, 194, 247);
 }
 
 .message-bubble-mine{
     align-self: flex-end;
+    color: white;
+    background-color: rgb(79, 96, 172);
 }
 
 .status-mine{

@@ -37,7 +37,7 @@ const HomePage = ({currentUserId,setCurrentUserId,setAuth,onlineUsers})=> {
    ,[])
 
    return (
-      <div className="container">
+      <div className="home-page">
          <div className="left-area">
             <div className="profileInfo-area">
                <ProfileHeader profile={profile} setAuth={setAuth} setCurrentUserId={setCurrentUserId}/>
