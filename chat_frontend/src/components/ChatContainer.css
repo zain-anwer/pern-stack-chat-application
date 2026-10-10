@@ -134,7 +134,8 @@ input:focus{
     height: 100%;
     width: 100%;
     display: block;
-    object-fit: contain;
+    border-radius: 50%;
+    object-fit: cover;
 }
 
 @media (max-width: 640px) {

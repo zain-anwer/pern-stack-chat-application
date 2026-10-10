@@ -12,7 +12,7 @@ import './HomePage.css'
 const HomePage = ({currentUserId,setCurrentUserId,setAuth,onlineUsers})=> {
 
    const [readRefreshes,setReadRefreshes] = useState(0)
-   const [profile,setProfile] = useState({name:"",email:"",password:""})
+   const [profile,setProfile] = useState({name:"",email:"",profilePicture:""})
    const [activeTab,setActiveTab] = useState("chats")
    const [chatSelected,setChatSelected] = useState([])
 
@@ -23,7 +23,11 @@ const HomePage = ({currentUserId,setCurrentUserId,setAuth,onlineUsers})=> {
          try{
             console.log("Hello this is the fetch profile function")
             const res = await axiosInstance("/auth/get-profile")
-            setProfile({name: res.data.name, email: res.data.email, password: res.data.password})
+            setProfile({
+               name: res.data.name,
+               email: res.data.email,
+               profilePicture: res.data.profilePicture
+            })
          }
 
          catch(error)
@@ -40,7 +44,7 @@ const HomePage = ({currentUserId,setCurrentUserId,setAuth,onlineUsers})=> {
       <div className="home-page">
          <div className="left-area">
             <div className="profileInfo-area">
-               <ProfileHeader profile={profile} setAuth={setAuth} setCurrentUserId={setCurrentUserId}/>
+               <ProfileHeader profile={profile} setProfile={setProfile} setAuth={setAuth} setCurrentUserId={setCurrentUserId}/>
             </div>
             <div className="active-tab-area">
                <button 

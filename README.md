@@ -12,6 +12,8 @@ A real-time PERN stack chat application built as a rite of passage on my backend
 - **Online/offline presence** — users see who's currently active, with automatic status updates on connect and disconnect
 - **Unread message counts** — per-conversation unread badges that update in real time
 - **JWT authentication** with secure httpOnly cookies
+- **Profile editing** — update your name, email, or password with current-password verification; changing email or password signs you out
+- **Profile photos** — upload or remove a photo from the profile modal using Cloudinary; photos appear in contact lists, chat lists, and the open-chat header, with a default avatar when no photo is set
 - **Arcjet rate limiting** middleware to protect auth endpoints
 - **Group-chat extensible schema** — the database is designed to support group conversations with minimal changes
 - **PostgreSQL** with triggers for automated message status management, transactions for data integrity, and indexes for query performance
@@ -69,13 +71,18 @@ npm install
 
 Create a `.env` file in `chat_backend/`:
 ```dotenv
-PORT=3000
+PORT=7860
 NODE_ENV=development
-DATABASE_URL=your_postgresql_connection_string
+DB_URI=your_postgresql_connection_string
 JWT_SECRET=your_jwt_secret
 SALT_ROUNDS=10
 CLIENT_URL=http://localhost:5173
+CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
+CLOUDINARY_API_KEY=your_cloudinary_api_key
+CLOUDINARY_API_SECRET=your_cloudinary_api_secret
 ```
+
+Cloudinary credentials are required for profile photo uploads. Keep the API secret in the backend environment only; do not add these credentials to the frontend environment or commit real secret values.
 
 **Set up the database:**
 

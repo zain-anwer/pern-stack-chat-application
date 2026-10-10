@@ -235,7 +235,8 @@ const ChatContainer = ({currentUserId,chat_information,setChatSelected,setReadRe
                     res.data.new_message.conversation_id,
                     chat_information[1],
                     false,
-                    chat_information[3]
+                    chat_information[3],
+                    chat_information[4]
                 ])
             }
 
@@ -255,11 +256,15 @@ const ChatContainer = ({currentUserId,chat_information,setChatSelected,setReadRe
         <> 
             <div className="opened-chat-info-area">
                 <div className="dp-area">
-                    <img className="dp" src='/images/default_dp.png'/>
+                    <img
+                        className="dp"
+                        src={chat_information[4] && chat_information[4] !== "/data/profileImages/default.jpg" ? chat_information[4] : "/images/default_dp.png"}
+                        alt={`${chat_information[1] || "Chat"} profile`}
+                    />
                 </div>
                 <div className="name-status-area">
-                    <h3 style={{fontFamily:'Inter'}}>{chat_information[1]}</h3>
-                    {(onlineUsers.some(userId => String(userId) === String(chat_information[3]))? <sub style={{fontFamily: 'Roboto'}}>Online</sub> : <sub style={{fontFamily: 'Roboto'}}>Offline</sub>)}
+                    <h3>{chat_information[1]}</h3>
+                    {(onlineUsers.some(userId => String(userId) === String(chat_information[3]))? <sub>Online</sub> : <sub>Offline</sub>)}
                 </div>
                 <button onClick={()=>{closeChat()}} className="close-chat-button">close chat</button>
             </div>

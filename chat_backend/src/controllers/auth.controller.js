@@ -2,6 +2,7 @@ import { pool } from '../lib/db.js';
 import { generateToken } from '../lib/utils.js';
 import dotenv from 'dotenv';
 import bcrypt from 'bcrypt';
+import { v2 as cloudinary } from 'cloudinary';
 
 // using the env file to get salt rounds for bcrypt
 dotenv.config();
@@ -128,7 +129,7 @@ export const getProfile = async (req,res) =>
     try{
         const userId = req.userId
 
-        const result = await pool.query("SELECT name, email, password from Users where user_id = $1;",[userId])
+        const result = await pool.query("SELECT name, email, profile_picture from Users where user_id = $1;",[userId])
         
         if (result.rows.length === 0) {
             return res.status(404).json({ message: "User not found" });
@@ -137,7 +138,7 @@ export const getProfile = async (req,res) =>
         res.status(200).json({
             name : result.rows[0].name,
             email : result.rows[0].email,
-            password : result.rows[0].password
+            profilePicture: result.rows[0].profile_picture
         })
     }
     catch(error)
@@ -156,4 +157,166 @@ Notes:
 
 */
 
-export const updateProfile = async (req,res) => {};
+export const updateProfile = async (req,res) =>
+{
+    try
+    {
+        const { currentPassword, name, email, newPassword, confirmPassword } = req.body;
+        const requestedUpdates = [name !== undefined, email !== undefined, newPassword !== undefined]
+            .filter(Boolean).length;
+
+        if (typeof currentPassword !== "string" || !currentPassword || requestedUpdates !== 1)
+            return res.status(400).json({message:"Enter your current password and submit one profile change"});
+
+        if (name !== undefined && (typeof name !== "string" || !name.trim() || name.trim().length > 100))
+            return res.status(400).json({message:"Name must be between 1 and 100 characters"});
+
+        if (email !== undefined && typeof email !== "string")
+            return res.status(400).json({message:"Enter a valid email address"});
+        const normalizedEmail = email?.trim();
+        if (email !== undefined && (!normalizedEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)))
+            return res.status(400).json({message:"Enter a valid email address"});
+
+        if (newPassword !== undefined) {
+            if (typeof newPassword !== "string" || typeof confirmPassword !== "string")
+                return res.status(400).json({message:"Enter and confirm your new password"});
+            if (newPassword.length < 6)
+                return res.status(400).json({message:"Password must be six characters or greater"});
+            if (newPassword !== confirmPassword)
+                return res.status(400).json({message:"Passwords do not match"});
+        }
+
+        const userResult = await pool.query(
+            "SELECT password FROM Users WHERE user_id = $1;",
+            [req.userId]
+        );
+        if (userResult.rows.length === 0)
+            return res.status(404).json({message:"User not found"});
+
+        const passwordMatches = await bcrypt.compare(currentPassword, userResult.rows[0].password);
+        if (!passwordMatches)
+            return res.status(401).json({message:"Current password is incorrect"});
+
+        if (normalizedEmail !== undefined) {
+            const existingEmail = await pool.query(
+                "SELECT 1 FROM Users WHERE email = $1 AND user_id <> $2;",
+                [normalizedEmail, req.userId]
+            );
+            if (existingEmail.rows.length > 0)
+                return res.status(409).json({message:"That email address is already in use"});
+        }
+
+        if (newPassword !== undefined) {
+            const hashedPassword = await bcrypt.hash(newPassword, parseInt(process.env.SALT_ROUNDS, 10));
+            await pool.query("UPDATE Users SET password = $1 WHERE user_id = $2;", [hashedPassword, req.userId]);
+        } else if (normalizedEmail !== undefined) {
+            await pool.query("UPDATE Users SET email = $1 WHERE user_id = $2;", [normalizedEmail, req.userId]);
+        } else {
+            await pool.query("UPDATE Users SET name = $1 WHERE user_id = $2;", [name.trim(), req.userId]);
+        }
+
+        const profileResult = await pool.query(
+            "SELECT name, email, profile_picture FROM Users WHERE user_id = $1;",
+            [req.userId]
+        );
+        const profile = profileResult.rows[0];
+        return res.status(200).json({
+            success: true,
+            requiresLogout: newPassword !== undefined || normalizedEmail !== undefined,
+            profile: {
+                name: profile.name,
+                email: profile.email,
+                profilePicture: profile.profile_picture
+            }
+        });
+    }
+    catch (error)
+    {
+        if (error.code === "23505")
+            return res.status(409).json({message:"That email address is already in use"});
+        console.error("Error updating profile:", error);
+        return res.status(500).json({message:"Unable to update profile"});
+    }
+};
+
+export const updateProfilePicture = async (req,res) =>
+{
+    try
+    {
+        if (!req.file)
+            return res.status(400).json({message:"Choose an image to upload"});
+
+        const { CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET } = process.env;
+        if (!CLOUDINARY_CLOUD_NAME || !CLOUDINARY_API_KEY || !CLOUDINARY_API_SECRET)
+            return res.status(503).json({message:"Profile image uploads are not configured"});
+
+        cloudinary.config({
+            cloud_name: CLOUDINARY_CLOUD_NAME,
+            api_key: CLOUDINARY_API_KEY,
+            api_secret: CLOUDINARY_API_SECRET,
+            secure: true
+        });
+
+        const uploadResult = await new Promise((resolve,reject) =>
+        {
+            cloudinary.uploader.upload_stream(
+                {folder:"bubble-chat/profile-images", resource_type:"image"},
+                (error,result) =>
+                {
+                    if (error)
+                        return reject(error);
+                    if (!result?.secure_url)
+                        return reject(new Error("Cloudinary did not return an image URL"));
+                    return resolve(result);
+                }
+            ).end(req.file.buffer);
+        });
+
+        const profileResult = await pool.query(
+            "UPDATE Users SET profile_picture = $1 WHERE user_id = $2 RETURNING name, email, profile_picture;",
+            [uploadResult.secure_url, req.userId]
+        );
+        if (profileResult.rows.length === 0)
+            return res.status(404).json({message:"User not found"});
+
+        const profile = profileResult.rows[0];
+        return res.status(200).json({
+            success: true,
+            profile: {
+                name: profile.name,
+                email: profile.email,
+                profilePicture: profile.profile_picture
+            }
+        });
+    }
+    catch (error)
+    {
+        console.error("Error uploading profile picture:", error);
+        return res.status(500).json({message:"Unable to upload profile image"});
+    }
+};
+
+export const removeProfilePicture = async (req,res) =>
+{
+    try
+    {
+        const profileResult = await pool.query(
+            "UPDATE Users SET profile_picture = NULL WHERE user_id = $1 RETURNING name, email, profile_picture;",
+            [req.userId]
+        );
+        const profile = profileResult.rows[0];
+        return res.status(200).json({
+            success: true,
+            profile: {
+                name: profile.name,
+                email: profile.email,
+                profilePicture: profile.profile_picture
+            }
+        });
+    }
+    catch (error)
+    {
+        console.error("Error removing profile picture:", error);
+        return res.status(500).json({message:"Unable to remove profile image"});
+    }
+};

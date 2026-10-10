@@ -30,9 +30,9 @@ const ChatList = ({setReadRefreshes,readRefreshes,setChatSelected}) =>
     },[setReadRefreshes])
     
     
-    const selectChat = (conversation_id,display_name,is_group,other_user_id) =>
+    const selectChat = (conversation_id,display_name,is_group,other_user_id,profile_picture) =>
     {
-        setChatSelected([conversation_id,display_name,is_group,other_user_id])
+        setChatSelected([conversation_id,display_name,is_group,other_user_id,profile_picture])
         console.log("Chat selected with conversation id: ",conversation_id)
     }
     
@@ -72,7 +72,15 @@ const ChatList = ({setReadRefreshes,readRefreshes,setChatSelected}) =>
                         // make a chat tile pleasee
                         chatList.map(
                             (chat) =>
-                                <button key={chat.conversation_id} className="chat-tile" onClick={()=>{selectChat(chat.conversation_id,chat.display_name,chat.is_group,chat.other_user_id)}}>{chat.display_name}{(chat.unread_count !== '0') ? <span className="unread_count">{chat.unread_count}</span>: ""}</button> 
+                                <button key={chat.conversation_id} className="chat-tile" onClick={()=>{selectChat(chat.conversation_id,chat.display_name,chat.is_group,chat.other_user_id,chat.profile_picture)}}>
+                                    <img
+                                        className="chat-tile-avatar"
+                                        src={chat.profile_picture && chat.profile_picture !== "/data/profileImages/default.jpg" ? chat.profile_picture : "/images/default_dp.png"}
+                                        alt=""
+                                    />
+                                    <span className="chat-tile-name">{chat.display_name}</span>
+                                    {(chat.unread_count !== '0') ? <span className="unread_count">{chat.unread_count}</span>: ""}
+                                </button>
                         )
                     )
             }

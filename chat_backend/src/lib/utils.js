@@ -5,7 +5,7 @@ dotenv.config();
 
 export const generateToken = (userId) =>
 {
-    const token = jwt.sign({userId},process.env.JWT_SECRET,{expiresIn : "7d"});
+    const token = jwt.sign({userId},process.env.JWT_SECRET,{expiresIn : "7h"});
     
     // removing cookie based token transfer because of some bullshit hf proxy settings or sm :(
     // if you ever for some god forsaken reason need to do it again change the function signature as well idiot

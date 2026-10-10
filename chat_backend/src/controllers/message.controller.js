@@ -59,6 +59,11 @@ const chatlist_query = `
           ELSE other_member.user_id
         END AS other_user_id,
 
+        CASE
+          WHEN Conversations.is_group THEN NULL
+          ELSE other_member.profile_picture
+        END AS profile_picture,
+
         -- unread count 
         (SELECT COUNT(*) 
         FROM Message_Status
@@ -70,7 +75,7 @@ const chatlist_query = `
       FROM Conversations
       JOIN Messages ON Messages.message_id = Conversations.last_message_id
       LEFT JOIN LATERAL (
-        SELECT Users.user_id, Users.name
+        SELECT Users.user_id, Users.name, Users.profile_picture
         FROM Conversation_Members
         JOIN Users ON Users.user_id = Conversation_Members.member_id
         WHERE Conversation_Members.conversation_id = Conversations.conversation_id
@@ -101,6 +106,7 @@ const chatlist_query = `
         is_group,
         display_name,
         other_user_id,
+        profile_picture,
         unread_count
       FROM ranked_chats
       WHERE chat_rank = 1
@@ -166,13 +172,17 @@ export const getAllContacts = async (req,res) =>
 {   
   try{
     const currentUserId = req.userId
-    const result = await pool.query("SELECT user_id, name from Users where user_id != $1;",[currentUserId])
+    const result = await pool.query(
+      "SELECT user_id, name, profile_picture FROM Users WHERE user_id != $1;",
+      [currentUserId]
+    )
     
     const contacts = result.rows.map(row => 
       (
         {
           user_id: row.user_id,
-          name: row.name
+          name: row.name,
+          profile_picture: row.profile_picture
         }
       )
     )
@@ -292,6 +302,7 @@ export const getChatList = async (req, res) => {
       display_name: row.display_name,
       is_group: row.is_group,
       other_user_id: row.other_user_id,
+      profile_picture: row.profile_picture,
       unread_count: row.unread_count,
       last_message: row.last_message,
       last_message_time: row.last_message_time
